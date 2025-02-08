@@ -43,7 +43,7 @@ class Search extends Component<SearchProps, SearchState> {
         />
         <button
           type="button"
-          className="bg-red-500 font-semibold rounded p-1"
+          className="bg-rose-600 font-semibold rounded p-1"
           onClick={this.handleSearch}
         >
           Search
