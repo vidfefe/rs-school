@@ -14,9 +14,10 @@ interface Pokemon {
 
 interface ResultsProps {
   searchValue: string;
+  onCardClick: (pokemonName: string) => void;
 }
 
-const Results: React.FC<ResultsProps> = ({ searchValue }) => {
+const Results: React.FC<ResultsProps> = ({ searchValue, onCardClick }) => {
   const { page } = useParams<{ page: string }>();
   const currentPage = Number(page) || 1;
 
@@ -61,14 +62,18 @@ const Results: React.FC<ResultsProps> = ({ searchValue }) => {
   }
 
   return (
-    <>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+    <div className="flex flex-col  gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 place-items-center gap-5">
         {results.map((pokemon, index) => (
-          <Card key={index} {...pokemon} />
+          <Card
+            key={index}
+            {...pokemon}
+            onClick={() => onCardClick(pokemon.name)}
+          />
         ))}
       </div>
       <Pagination currentPage={currentPage} totalPages={totalPages} />
-    </>
+    </div>
   );
 };
 
