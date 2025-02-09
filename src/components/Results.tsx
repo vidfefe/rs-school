@@ -1,4 +1,8 @@
 import { Component } from 'react';
+import Card from './Card';
+import { fetchPokemon } from '../api/api';
+import NoResults from './NoResults';
+import Loader from './Loader';
 
 interface Result {
   name: string;
@@ -6,31 +10,67 @@ interface Result {
   image: string;
 }
 
-interface ResultsProps {
+interface ResultsState {
   results: Result[];
+  isLoading: boolean;
+  error: string | null;
 }
 
-class Results extends Component<ResultsProps> {
+interface ResultsProps {
+  searchValue: string;
+}
+
+class Results extends Component<ResultsProps, ResultsState> {
+  constructor(props: ResultsProps) {
+    super(props);
+    this.state = {
+      results: [],
+      isLoading: false,
+      error: null,
+    };
+  }
+
+  componentDidUpdate(prevProps: Readonly<ResultsProps>): void {
+    if (prevProps.searchValue !== this.props.searchValue) {
+      this.fetchData(this.props.searchValue);
+    }
+  }
+
+  componentDidMount() {
+    this.fetchData(this.props.searchValue);
+  }
+
+  fetchData = async (searchValue: string) => {
+    this.setState({ isLoading: true, error: null });
+
+    try {
+      const results = await fetchPokemon(searchValue.trim());
+      this.setState({ results, isLoading: false });
+    } catch (error) {
+      if (error instanceof Error) {
+        this.setState({ error: error.message, isLoading: false });
+      }
+    }
+  };
+
   render() {
-    const { results } = this.props;
+    const { results, isLoading, error } = this.state;
+
+    if (isLoading) {
+      return <Loader />;
+    }
+    if (error) {
+      return <div className="text-center text-red-500">{error}</div>;
+    }
+
+    if (results.length === 0) {
+      return <NoResults />;
+    }
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {results.map((pokemon, index) => (
-          <div
-            className="flex-col border border-rose-600 rounded shadow w-[302px]"
-            key={index}
-          >
-            <img
-              src={pokemon.image}
-              alt={pokemon.name}
-              width={300}
-              height={300}
-              className="mx-auto"
-            />
-            <h2 className="text-2xl font-bold">{pokemon.name}</h2>
-            <p>{pokemon.description}</p>
-          </div>
+          <Card key={index} {...pokemon} />
         ))}
       </div>
     );
