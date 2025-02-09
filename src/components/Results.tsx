@@ -3,6 +3,8 @@ import Card from './Card';
 import { fetchPokemon } from '../api/api';
 import NoResults from './NoResults';
 import Loader from './Loader';
+import Pagination from './Pagination';
+import { useParams } from 'react-router';
 
 interface Pokemon {
   name: string;
@@ -15,9 +17,13 @@ interface ResultsProps {
 }
 
 const Results: React.FC<ResultsProps> = ({ searchValue }) => {
+  const { page } = useParams<{ page: string }>();
+  const currentPage = Number(page) || 1;
+
   const [results, setResults] = useState<Pokemon[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,8 +31,12 @@ const Results: React.FC<ResultsProps> = ({ searchValue }) => {
       setError(null);
 
       try {
-        const results = await fetchPokemon(searchValue.trim());
-        setResults(results);
+        const { items, totalPages } = await fetchPokemon(
+          searchValue.trim(),
+          currentPage
+        );
+        setResults(items);
+        setTotalPages(totalPages);
       } catch (error) {
         if (error instanceof Error) {
           setError(error.message);
@@ -37,7 +47,7 @@ const Results: React.FC<ResultsProps> = ({ searchValue }) => {
     };
 
     fetchData();
-  }, [searchValue]);
+  }, [searchValue, currentPage]);
 
   if (isLoading) {
     return <Loader />;
@@ -51,11 +61,14 @@ const Results: React.FC<ResultsProps> = ({ searchValue }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-      {results.map((pokemon, index) => (
-        <Card key={index} {...pokemon} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {results.map((pokemon, index) => (
+          <Card key={index} {...pokemon} />
+        ))}
+      </div>
+      <Pagination currentPage={currentPage} totalPages={totalPages} />
+    </>
   );
 };
 
