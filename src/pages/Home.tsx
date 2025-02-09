@@ -53,6 +53,7 @@ const Home = () => {
       {selectedPokemon && (
         <div className="w-full md:w-1/3 relative">
           <button
+            aria-label="Close"
             onClick={handleCloseDetails}
             className="absolute top-2 right-5 hover:text-rose-600 transition-all"
           >

@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router';
 import ErrorBoundary from './components/ErrorBoundary';
 import Home from './pages/Home';
 import NotFound from './components/NotFound';
-import PokemonDetails from './components/PokemonDetails';
+import PokemonDetails from './components/CardDetails';
 
 const App = () => {
   return (

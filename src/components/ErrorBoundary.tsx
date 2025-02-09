@@ -1,24 +1,17 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
-import { useNavigate } from 'react-router';
 
 interface State {
   hasError: boolean;
 }
 
-interface ErrorBoundaryProps {
-  children?: ReactNode;
-  navigate: () => void;
-}
-
-class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
-  constructor(props: ErrorBoundaryProps) {
+class ErrorBoundary extends Component<{ children?: ReactNode }, State> {
+  constructor(props: { children: ReactNode }) {
     super(props);
     this.state = { hasError: false };
   }
 
   handleReset = () => {
     this.setState({ hasError: false });
-    this.props.navigate();
   };
 
   static getDerivedStateFromError(): State {
@@ -49,11 +42,4 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
   }
 }
 
-const ErrorBoundaryWithNavigate = ({ children }: { children: ReactNode }) => {
-  const navigate = useNavigate();
-  return (
-    <ErrorBoundary navigate={() => navigate('/')}>{children}</ErrorBoundary>
-  );
-};
-
-export default ErrorBoundaryWithNavigate;
+export default ErrorBoundary;
