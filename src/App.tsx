@@ -1,8 +1,14 @@
 import { Component, ReactNode } from 'react';
+import ErrorBoundary from './components/ErrorBoundary';
+import Home from './pages/Home';
 
-class App extends Component {
+class App extends Component<object> {
   render(): ReactNode {
-    return <></>;
+    return (
+      <ErrorBoundary>
+        <Home />
+      </ErrorBoundary>
+    );
   }
 }
 
