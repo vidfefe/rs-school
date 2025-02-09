@@ -16,19 +16,22 @@ class Search extends Component<SearchProps, SearchState> {
 
   componentDidMount(): void {
     const savedSearchValue: string = localStorage.getItem('searchValue') || '';
-    this.setState({ searchValue: savedSearchValue });
+    if (savedSearchValue) {
+      this.props.onSearch(savedSearchValue);
+      this.setState({ searchValue: savedSearchValue });
+    }
   }
 
   handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value.trim();
     this.setState({ searchValue: value });
+    localStorage.setItem('searchValue', value);
   };
 
   handleSearch = () => {
     const searchValue = this.state.searchValue.trim();
-    localStorage.setItem('searchValue', searchValue);
     this.props.onSearch(searchValue);
-    console.log(this.state.searchValue);
+    console.log(searchValue);
   };
 
   render() {
@@ -37,13 +40,13 @@ class Search extends Component<SearchProps, SearchState> {
         <input
           type="text"
           className="border rounded p-1"
-          placeholder="Enter search value..."
+          placeholder="Enter name..."
           onChange={this.handleInputChange}
-          defaultValue={this.state.searchValue}
+          value={this.state.searchValue}
         />
         <button
           type="button"
-          className="bg-rose-600 font-semibold rounded p-1"
+          className="bg-rose-600 font-semibold rounded px-3 py-1"
           onClick={this.handleSearch}
         >
           Search
