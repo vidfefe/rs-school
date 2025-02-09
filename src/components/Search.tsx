@@ -1,59 +1,39 @@
-import { ChangeEvent, Component } from 'react';
-
-interface SearchState {
-  searchValue: string;
-}
+import React, { ChangeEvent, useState } from 'react';
 
 interface SearchProps {
   onSearch: (searchValue: string) => void;
+  initialValue?: string;
 }
 
-class Search extends Component<SearchProps, SearchState> {
-  constructor(props: SearchProps) {
-    super(props);
-    this.state = { searchValue: '' };
-  }
+const Search: React.FC<SearchProps> = ({ onSearch, initialValue = '' }) => {
+  const [searchValue, setSearchValue] = useState(initialValue);
 
-  componentDidMount(): void {
-    const savedSearchValue: string = localStorage.getItem('searchValue') || '';
-    if (savedSearchValue) {
-      this.props.onSearch(savedSearchValue);
-      this.setState({ searchValue: savedSearchValue });
-    }
-  }
-
-  handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value.trim();
-    this.setState({ searchValue: value });
-    localStorage.setItem('searchValue', value);
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(event.target.value);
   };
 
-  handleSearch = () => {
-    const searchValue = this.state.searchValue.trim();
-    this.props.onSearch(searchValue);
-    console.log(searchValue);
+  const handleSearch = () => {
+    onSearch(searchValue);
   };
 
-  render() {
-    return (
-      <div className="flex items-center space-x-4">
-        <input
-          type="text"
-          className="border rounded p-1"
-          placeholder="Enter name..."
-          onChange={this.handleInputChange}
-          value={this.state.searchValue}
-        />
-        <button
-          type="button"
-          className="bg-rose-600 font-semibold rounded px-3 py-1"
-          onClick={this.handleSearch}
-        >
-          Search
-        </button>
-      </div>
-    );
-  }
-}
+  return (
+    <div className="flex items-center space-x-4">
+      <input
+        type="text"
+        className="border rounded p-1"
+        placeholder="Enter name..."
+        onChange={handleInputChange}
+        value={searchValue}
+      />
+      <button
+        type="button"
+        className="bg-rose-600 font-semibold rounded px-3 py-1"
+        onClick={handleSearch}
+      >
+        Search
+      </button>
+    </div>
+  );
+};
 
 export default Search;

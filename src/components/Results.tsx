@@ -1,80 +1,62 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import Card from './Card';
 import { fetchPokemon } from '../api/api';
 import NoResults from './NoResults';
 import Loader from './Loader';
 
-interface Result {
+interface Pokemon {
   name: string;
   description: string;
   image: string;
-}
-
-interface ResultsState {
-  results: Result[];
-  isLoading: boolean;
-  error: string | null;
 }
 
 interface ResultsProps {
   searchValue: string;
 }
 
-class Results extends Component<ResultsProps, ResultsState> {
-  constructor(props: ResultsProps) {
-    super(props);
-    this.state = {
-      results: [],
-      isLoading: false,
-      error: null,
-    };
-  }
+const Results: React.FC<ResultsProps> = ({ searchValue }) => {
+  const [results, setResults] = useState<Pokemon[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  componentDidUpdate(prevProps: Readonly<ResultsProps>): void {
-    if (prevProps.searchValue !== this.props.searchValue) {
-      this.fetchData(this.props.searchValue);
-    }
-  }
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
 
-  componentDidMount() {
-    this.fetchData(this.props.searchValue);
-  }
-
-  fetchData = async (searchValue: string) => {
-    this.setState({ isLoading: true, error: null });
-
-    try {
-      const results = await fetchPokemon(searchValue.trim());
-      this.setState({ results, isLoading: false });
-    } catch (error) {
-      if (error instanceof Error) {
-        this.setState({ error: error.message, isLoading: false });
+      try {
+        const results = await fetchPokemon(searchValue.trim());
+        setResults(results);
+      } catch (error) {
+        if (error instanceof Error) {
+          setError(error.message);
+        }
+      } finally {
+        setIsLoading(false);
       }
-    }
-  };
+    };
 
-  render() {
-    const { results, isLoading, error } = this.state;
+    fetchData();
+  }, [searchValue]);
 
-    if (isLoading) {
-      return <Loader />;
-    }
-    if (error) {
-      return <div className="text-center text-red-500">{error}</div>;
-    }
-
-    if (results.length === 0) {
-      return <NoResults />;
-    }
-
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {results.map((pokemon, index) => (
-          <Card key={index} {...pokemon} />
-        ))}
-      </div>
-    );
+  if (isLoading) {
+    return <Loader />;
   }
-}
+  if (error) {
+    return <div className="text-center text-red-500">{error}</div>;
+  }
+
+  if (results.length === 0) {
+    return <NoResults />;
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {results.map((pokemon, index) => (
+        <Card key={index} {...pokemon} />
+      ))}
+    </div>
+  );
+};
 
 export default Results;
