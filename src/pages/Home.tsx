@@ -3,8 +3,10 @@ import Search from '../components/Search';
 import Results from '../components/Results';
 import ErrorButton from '../components/ErrorButton';
 import { useSearchQuery } from '../hooks/useSearchQuery';
+import { useNavigate } from 'react-router';
 
 const Home = () => {
+  const navigate = useNavigate();
   const [searchValue, setSearchValue] = useSearchQuery('searchValue');
   const [query, setQuery] = useState<string>('');
 
@@ -17,6 +19,7 @@ const Home = () => {
   const handleSearch = (value: string) => {
     setSearchValue(value);
     setQuery(value.trim());
+    navigate(`/search/1`);
   };
 
   return (
