@@ -19,9 +19,6 @@ const config: Config.InitialOptions = {
     'src/__tests__/setup.ts',
   ],
 
-  transform: {
-    '^.+\\.tsx?$': 'ts-jest',
-  },
   coverageThreshold: {
     global: {
       statements: 70,
