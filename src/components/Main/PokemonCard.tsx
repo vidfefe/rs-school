@@ -14,7 +14,7 @@ const PokemonCard: React.FC<PokemonCardProps> = ({
   return (
     <li
       onClick={onClick}
-      className="flex-col border border-white hover:border-rose-600 transition-all  rounded shadow w-[255px] p-2"
+      className="flex-col border border-gray-300 dark:border-white hover:border-rose-600 transition-all rounded shadow w-[255px] p-2"
     >
       <img
         src={image}

@@ -23,7 +23,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="container flex flex-col gap-5 mx-auto my-5 ">
+    <div className="container flex flex-col gap-5 mx-auto my-5">
       <Header onSearch={handleSearch} initialValue={searchValue} />
       <Main searchQuery={query} />
       <Footer />

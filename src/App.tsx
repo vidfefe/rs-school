@@ -11,11 +11,6 @@ const App = () => {
         <Routes>
           <Route path="/" element={<HomePage />}>
             <Route index element={<PokemonDetailsPage />} />
-            {/* <Route path="/search/:page" element={<Home />} /> */}
-            {/* <Route
-              path="search/details/:pokemonName"
-              element={<PokemonDetails />}
-            /> */}
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

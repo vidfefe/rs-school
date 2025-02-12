@@ -20,7 +20,7 @@ const Search: React.FC<SearchProps> = ({ onSearch, initialValue = '' }) => {
     <div className="flex items-center space-x-4">
       <input
         type="text"
-        className="border rounded p-1"
+        className="border border-gray-300 focus:outline-rose-600 rounded p-1"
         placeholder="Enter name..."
         onChange={handleInputChange}
         value={searchValue}
