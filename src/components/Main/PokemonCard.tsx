@@ -1,14 +1,19 @@
-interface CardProps {
+interface PokemonCardProps {
   name: string;
   description: string;
   image: string;
-  onClick: (pokemonName: string) => void;
+  onClick: () => void;
 }
 
-const Card: React.FC<CardProps> = ({ name, description, image, onClick }) => {
+const PokemonCard: React.FC<PokemonCardProps> = ({
+  name,
+  description,
+  image,
+  onClick,
+}) => {
   return (
-    <div
-      onClick={() => onClick(name)}
+    <li
+      onClick={onClick}
       className="flex-col border border-white hover:border-rose-600 transition-all  rounded shadow w-[255px] p-2"
     >
       <img
@@ -20,8 +25,8 @@ const Card: React.FC<CardProps> = ({ name, description, image, onClick }) => {
       />
       <h2 className="text-2xl font-bold">{name}</h2>
       <p>{description}</p>
-    </div>
+    </li>
   );
 };
 
-export default Card;
+export default PokemonCard;

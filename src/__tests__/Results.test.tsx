@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
-import Results from '../components/Results';
+import Results from '../components/Main/PokemonList';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { fetchPokemon } from '../api/api';
 
