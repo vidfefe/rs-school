@@ -1,11 +1,12 @@
-import { FC, MouseEvent, useEffect, useState } from 'react';
+import { FC, MouseEvent } from 'react';
 import PokemonList from '@/components/Main/PokemonList';
 import { Outlet, useSearchParams } from 'react-router';
 import { Pokemon } from '@/types/pokemonTypes';
 import Pagination from '@/components/Main/Pagination';
 import Loader from '@/components/Loader';
 import NoResults from '@/components/NoResults';
-import { fetchPokemon } from '@/api/api';
+import { useGetPokemonsQuery } from '@/api/pokemonApi';
+import Error from '@/components/Error';
 
 interface MainProps {
   searchQuery: string;
@@ -13,36 +14,14 @@ interface MainProps {
 
 const Main: FC<MainProps> = ({ searchQuery }) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [results, setResults] = useState<Pokemon[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [totalPages, setTotalPages] = useState<number>(1);
-
   const currentPage = Number(searchParams.get('page') || '1');
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
+  const { data, isLoading, isError, error } = useGetPokemonsQuery({
+    searchValue: searchQuery.trim(),
+    currentPage,
+  });
 
-      try {
-        const { items, totalPages } = await fetchPokemon(
-          searchQuery.trim(),
-          currentPage
-        );
-        setResults(items);
-        setTotalPages(totalPages);
-      } catch (error) {
-        if (error instanceof Error) {
-          setError(error.message);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [searchQuery, currentPage]);
+  const { items: results, totalPages } = data || { items: [], totalPages: 1 };
 
   const handleSelectPokemon = (pokemon: Pokemon) => {
     setSearchParams((prevParams) => {
@@ -65,8 +44,9 @@ const Main: FC<MainProps> = ({ searchQuery }) => {
   if (isLoading) {
     return <Loader />;
   }
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
+
+  if (isError) {
+    return <Error errorMessage={(error as Error).message} />;
   }
 
   if (results.length === 0) {

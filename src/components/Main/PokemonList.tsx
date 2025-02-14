@@ -1,6 +1,6 @@
 import PokemonCard from '@/components/Main/PokemonCard';
 import { togglePokemon } from '@/store/selectedPokemonsSlice';
-import { selectedPokemonsState } from '@/store/store';
+import { RootState } from '@/store/store';
 import { Pokemon } from '@/types/pokemonTypes';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -17,7 +17,7 @@ const PokemonList: React.FC<ResultsProps> = ({
 }) => {
   const dispatch = useDispatch();
   const selectedPokemons = useSelector(
-    (state: selectedPokemonsState) => state.selectedPokemons.selected
+    (state: RootState) => state.selectedPokemons.selected
   );
 
   return (
