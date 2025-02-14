@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
-import PokemonDetailsPage from '../components/PokemonCardDetails';
+import PokemonDetailsPage from '../components/Main/PokemonCardDetails';
 import { fetchPokemonDetails } from '../api/api';
 
 jest.mock('../api/api', () => ({

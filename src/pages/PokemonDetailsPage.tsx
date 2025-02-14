@@ -3,7 +3,7 @@ import { useLocation } from 'react-router';
 import { fetchPokemonDetails, PokemonDetails } from '@/api/api';
 import Loader from '@/components/Loader';
 import NoResults from '@/components/NoResults';
-import PokemonCardDetails from '@/components/PokemonCardDetails';
+import PokemonCardDetails from '@/components/Main/PokemonCardDetails';
 
 const PokemonDetailsPage = () => {
   const location = useLocation();
@@ -18,7 +18,6 @@ const PokemonDetailsPage = () => {
       const fetchDetails = async () => {
         setIsLoading(true);
         try {
-          console.log(pokemonName);
           const data = await fetchPokemonDetails(pokemonName);
           setDetails(data);
         } catch (error) {
