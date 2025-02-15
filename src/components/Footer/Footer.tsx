@@ -1,9 +1,11 @@
-import ErrorButton from '../ErrorButton';
+import ErrorButton from '@/components/ErrorButton';
+import Flyout from './Flyout';
 
 const Footer = () => {
   return (
     <footer className="self-end">
       <ErrorButton />
+      <Flyout />
     </footer>
   );
 };

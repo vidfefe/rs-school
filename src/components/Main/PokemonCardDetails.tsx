@@ -1,4 +1,4 @@
-import { PokemonDetails } from '@/api/api';
+import { PokemonDetails } from '@/types/pokemonTypes';
 import { FC } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 

@@ -3,7 +3,7 @@ interface PokemonCardProps {
   description: string;
   image: string;
   isSelected: boolean;
-  onClick: () => void;
+  onClick: (event: React.MouseEvent<HTMLLIElement>) => void;
   onSelect: () => void;
 }
 
@@ -18,7 +18,7 @@ const PokemonCard: React.FC<PokemonCardProps> = ({
   return (
     <li
       onClick={onClick}
-      className="flex-col border border-gray-300 dark:border-white hover:border-rose-600 transition-all rounded shadow w-[255px] p-2"
+      className="flex-col border border-gray-300 dark:border-white rounded p-2 hover:border-rose-600 transition-all shadow w-[255px] "
     >
       <img
         src={image}

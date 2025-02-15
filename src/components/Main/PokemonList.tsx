@@ -6,7 +6,10 @@ import { useDispatch, useSelector } from 'react-redux';
 
 interface ResultsProps {
   results: Pokemon[];
-  onSelectPokemon: (pokemonName: Pokemon) => void;
+  onSelectPokemon: (
+    event: React.MouseEvent<HTMLLIElement>,
+    pokemonName: Pokemon
+  ) => void;
   onUIClick: (event: React.MouseEvent<HTMLUListElement>) => void;
 }
 
@@ -30,7 +33,7 @@ const PokemonList: React.FC<ResultsProps> = ({
           key={index}
           {...pokemon}
           isSelected={selectedPokemons.includes(pokemon.name)}
-          onClick={() => onSelectPokemon(pokemon)}
+          onClick={(event) => onSelectPokemon(event, pokemon)}
           onSelect={() => dispatch(togglePokemon(pokemon.name))}
         />
       ))}

@@ -22,9 +22,14 @@ export const selectedPokemonsSlice = createSlice({
       }
       localStorage.setItem('selectedPokemons', JSON.stringify(state.selected));
     },
+    unselectAllPokemons: (state) => {
+      state.selected = [];
+      localStorage.removeItem('selectedPokemons');
+    },
   },
 });
 
-export const { togglePokemon } = selectedPokemonsSlice.actions;
+export const { togglePokemon, unselectAllPokemons } =
+  selectedPokemonsSlice.actions;
 
 export default selectedPokemonsSlice.reducer;

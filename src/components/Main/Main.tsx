@@ -23,7 +23,13 @@ const Main: FC<MainProps> = ({ searchQuery }) => {
 
   const { items: results, totalPages } = data || { items: [], totalPages: 1 };
 
-  const handleSelectPokemon = (pokemon: Pokemon) => {
+  const handleSelectPokemon = (
+    event: MouseEvent<HTMLLIElement>,
+    pokemon: Pokemon
+  ) => {
+    if ((event.target as HTMLElement).closest('input[type="checkbox"]')) {
+      return;
+    }
     setSearchParams((prevParams) => {
       const newParams = new URLSearchParams(prevParams);
       newParams.set('details', pokemon.name);
@@ -58,7 +64,9 @@ const Main: FC<MainProps> = ({ searchQuery }) => {
       <main className="flex flex-col flex-grow items-center gap-5">
         <PokemonList
           results={results}
-          onSelectPokemon={handleSelectPokemon}
+          onSelectPokemon={(event, pokemon) =>
+            handleSelectPokemon(event, pokemon)
+          }
           onUIClick={handleUlClick}
         />
         <Pagination totalPages={totalPages} />
