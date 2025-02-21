@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import NotFound from '@/components/NotFound';
+import NotFound from '@/pages/NotFoundPage';
 import { vi } from 'vitest';
 import { useNavigate } from 'react-router';
 import userEvent from '@testing-library/user-event';
