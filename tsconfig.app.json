@@ -7,6 +7,7 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "types": ["vitest/globals"],
     
 
     /* Bundler mode */
@@ -30,5 +31,5 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "vite.config.ts"]
 }

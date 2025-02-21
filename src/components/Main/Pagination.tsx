@@ -23,7 +23,7 @@ const Pagination = ({ totalPages }: PaginationProps) => {
   };
 
   return (
-    <div className="flex justify-center space-x-4">
+    <div data-testid="pagination" className="flex justify-center space-x-4">
       <button
         type="button"
         className={`px-3 py-1 rounded font-bold border-2 transition-all ${

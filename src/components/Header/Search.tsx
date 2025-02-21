@@ -20,6 +20,7 @@ const Search: React.FC<SearchProps> = ({ onSearch, initialValue = '' }) => {
     <div className="flex items-center space-x-4">
       <input
         type="text"
+        data-testid="search-input"
         className="border border-gray-300 focus:outline-rose-600 rounded p-1"
         placeholder="Enter name..."
         onChange={handleInputChange}
@@ -27,6 +28,7 @@ const Search: React.FC<SearchProps> = ({ onSearch, initialValue = '' }) => {
       />
       <button
         type="button"
+        data-testid="search-button"
         className="bg-rose-600 font-semibold rounded px-3 py-1"
         onClick={handleSearch}
       >

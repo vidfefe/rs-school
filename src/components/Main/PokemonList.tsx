@@ -25,6 +25,7 @@ const PokemonList: React.FC<ResultsProps> = ({
 
   return (
     <ul
+      data-testid="pokemon-list"
       className="grid grid-cols-1 md:grid-cols-3 place-items-center gap-8"
       onClick={onUIClick}
     >

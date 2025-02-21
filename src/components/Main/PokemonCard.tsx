@@ -27,7 +27,7 @@ const PokemonCard: React.FC<PokemonCardProps> = ({
         height={250}
         className="mx-auto"
       />
-      <div className=" flex flex-row items-center gap-2">
+      <div className="flex flex-row items-center gap-2">
         <h2 className="text-2xl font-bold">{name}</h2>
         <input
           type="checkbox"

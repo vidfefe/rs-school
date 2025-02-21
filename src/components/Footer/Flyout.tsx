@@ -25,6 +25,7 @@ const Flyout: FC = () => {
 
   return (
     <div
+      data-testid="flyout"
       className={`border-2 border-gray-300 dark:border-white bg-white dark:bg-[#242424] fixed bottom-3 left-1/2  transform -translate-x-1/2 rounded-lg  px-3 py-4 shadow-lg flex items-center gap-5  transition-all ${selectedPokemons.length > 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full'}`}
     >
       <h5>
