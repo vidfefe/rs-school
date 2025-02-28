@@ -5,6 +5,8 @@
 // import Main from '@/components/Main/Main';
 // import Footer from '@/components/Footer/Footer';
 
+import ThemeToggle from '@/components/ThemeToggle';
+
 const HomePage = () => {
   //   const [, setSearchParams] = useSearchParams();
   //   const [searchValue, setSearchValue] = useSearchQuery('searchValue');
@@ -27,7 +29,7 @@ const HomePage = () => {
       {/* <Header onSearch={handleSearch} initialValue={searchValue} />
       <Main searchQuery={query} />
       <Footer /> */}
-      <h1>jddd</h1>
+      <ThemeToggle />
     </div>
   );
 };
