@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import { pokemonApi } from '@/api/pokemonApi';
@@ -57,12 +57,14 @@ test('fetches and displays pokemons', async () => {
     </Provider>
   );
 
-  const pokemonNames = await screen.findAllByRole('heading', { level: 2 });
+  await waitFor(() =>
+    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(2)
+  );
 
-  expect(pokemonNames).toHaveLength(2);
-  expect(pokemonNames[0].textContent).toMatch(/bulbasaur/i);
-  expect(pokemonNames[1].textContent).toMatch(/ivysaur/i);
+  const pokemonNames = screen.getAllByRole('heading', { level: 2 });
 
-  const pokemonListItems = await screen.findAllByRole('listitem');
-  expect(pokemonListItems).toHaveLength(2);
+  expect(pokemonNames[0]).toHaveTextContent(/bulbasaur/i);
+  expect(pokemonNames[1]).toHaveTextContent(/ivysaur/i);
+
+  await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(2));
 });

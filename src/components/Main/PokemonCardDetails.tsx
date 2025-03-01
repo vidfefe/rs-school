@@ -1,31 +1,35 @@
 import { PokemonDetails } from '@/types/pokemonTypes';
+import { useRouter } from 'next/router';
 import { FC } from 'react';
-import { useLocation, useNavigate } from 'react-router';
 
 interface PokemonCardDetailsProps {
   details: PokemonDetails;
 }
 
 const PokemonCardDetails: FC<PokemonCardDetailsProps> = ({ details }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const { query, push, pathname } = router;
 
   const handleClose = () => {
-    const currentParams = new URLSearchParams(location.search);
-    currentParams.delete('details');
-    navigate(`${location.pathname}?${currentParams.toString()}`, {
-      replace: true,
-    });
+    const newQuery = { ...query };
+    delete newQuery.details;
+
+    push({ pathname, query: newQuery });
   };
 
   return (
-    <article className=" relative min-w-72 p-3 rounded-lg border-2 border-rose-600">
+    <article
+      data-testid="pokemon-card-details"
+      className=" relative min-w-72 p-3 rounded-lg border-2 border-rose-600"
+    >
       <button
         onClick={handleClose}
-        className="absolute top-0.5 right-2 text-xl font-semibold hover:text-rose-600 "
+        className="absolute top-0.5 right-2 text-xl font-semibold "
         aria-label="Close"
       >
-        ✕
+        <span className="text-gray-300 transition-all hover:text-rose-600">
+          ✕
+        </span>
       </button>
       <h2 className="text-3xl font-bold">{details.name}</h2>
       <img

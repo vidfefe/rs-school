@@ -1,6 +1,12 @@
 import { defineConfig } from 'vitest/config';
+import path from 'path';
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
@@ -12,10 +18,11 @@ export default defineConfig({
         '**/*.test.tsx',
         '**/*.spec.tsx',
         'src/__tests__/setup.ts',
-        'src/main.tsx',
-        'src/App.tsx',
       ],
       reporter: ['text', 'json', 'html'],
     },
+  },
+  esbuild: {
+    jsx: 'automatic',
   },
 });

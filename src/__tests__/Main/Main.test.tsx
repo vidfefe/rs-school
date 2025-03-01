@@ -1,19 +1,30 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { vi } from 'vitest';
-import { useSearchParams } from 'react-router';
+import { Mock, vi } from 'vitest';
+import { useRouter } from 'next/router';
 import { Provider } from 'react-redux';
 import { createTestStore } from '@/utils/testUtils';
 import Main from '@/components/Main/Main';
-import { useGetPokemonsQuery } from '@/api/pokemonApi';
+import {
+  useGetPokemonsQuery,
+  useGetPokemonDetailsQuery,
+} from '@/api/pokemonApi';
+import { PokemonDetails } from '@/types/pokemonTypes';
 
-vi.mock('react-router', () => ({
-  useSearchParams: vi.fn(),
-  Outlet: () => <div data-testid="outlet" />,
+vi.mock('next/router', () => ({
+  useRouter: vi.fn(),
 }));
 
-vi.mock('@/api/pokemonApi', () => {
+vi.mock('@/components/PokemonCardDetails', () => ({
+  default: ({ details }: { details: PokemonDetails }) => (
+    <div>{details.name}</div>
+  ),
+}));
+
+vi.mock('@/api/pokemonApi', async () => {
   const actual =
-    vi.importActual<typeof import('@/api/pokemonApi')>('@/api/pokemonApi');
+    await vi.importActual<typeof import('@/api/pokemonApi')>(
+      '@/api/pokemonApi'
+    );
   return {
     ...actual,
     pokemonApi: {
@@ -24,17 +35,33 @@ vi.mock('@/api/pokemonApi', () => {
           next(action),
     },
     useGetPokemonsQuery: vi.fn(),
+    useGetPokemonDetailsQuery: vi.fn(),
   };
 });
 
 describe('Main Component', () => {
-  const mockSetSearchParams = vi.fn();
+  const mockPush = vi.fn();
 
   beforeEach(() => {
-    vi.mocked(useSearchParams).mockReturnValue([
-      new URLSearchParams(),
-      mockSetSearchParams,
-    ]);
+    (useRouter as Mock).mockReturnValue({
+      query: {},
+      push: mockPush,
+    });
+    vi.mocked(useGetPokemonsQuery).mockReturnValue({
+      data: { items: [], totalPages: 1 },
+      isLoading: false,
+      isError: false,
+      error: null,
+      isFetching: false,
+      refetch: vi.fn(),
+    });
+    vi.mocked(useGetPokemonDetailsQuery).mockReturnValue({
+      data: null,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    });
   });
 
   afterEach(() => {
@@ -135,15 +162,10 @@ describe('Main Component', () => {
     expect(pokemonItem).toBeInTheDocument();
 
     fireEvent.click(pokemonItem!);
-    expect(mockSetSearchParams).toHaveBeenCalled();
+    expect(mockPush).toHaveBeenCalledWith({ query: { details: 'Pikachu' } });
   });
 
   test('calls handleUlClick and removes details from search params', () => {
-    vi.mocked(useSearchParams).mockReturnValue([
-      new URLSearchParams({ details: 'pikachu' }),
-      mockSetSearchParams,
-    ]);
-
     vi.mocked(useGetPokemonsQuery).mockReturnValue({
       data: { items: [{ name: 'Pikachu' }], totalPages: 1 },
       isLoading: false,
@@ -153,24 +175,24 @@ describe('Main Component', () => {
       refetch: vi.fn(),
     });
 
+    (useRouter as Mock).mockReturnValue({
+      query: { details: 'pikachu' },
+      push: mockPush,
+    });
+
     render(
       <Provider store={createTestStore()}>
         <Main searchQuery="" />
       </Provider>
     );
 
-    const ulElement = screen.getByRole('list');
+    const ulElement = screen.getByTestId('pokemon-list');
     fireEvent.click(ulElement);
 
-    expect(mockSetSearchParams).toHaveBeenCalledWith(expect.any(Function));
+    expect(mockPush).toHaveBeenCalledWith({ query: {} });
   });
 
-  test('renders Outlet when details param exists', () => {
-    vi.mocked(useSearchParams).mockReturnValue([
-      new URLSearchParams({ details: 'pikachu' }),
-      mockSetSearchParams,
-    ]);
-
+  test('does not trigger action if clicked on a checkbox', () => {
     vi.mocked(useGetPokemonsQuery).mockReturnValue({
       data: { items: [{ name: 'Pikachu' }], totalPages: 1 },
       isLoading: false,
@@ -179,25 +201,7 @@ describe('Main Component', () => {
       isFetching: false,
       refetch: vi.fn(),
     });
-
-    render(
-      <Provider store={createTestStore()}>
-        <Main searchQuery="" />
-      </Provider>
-    );
-
-    expect(screen.getByTestId('outlet')).toBeInTheDocument();
-  });
-
-  test('does not call handleSelectPokemon when clicking on checkbox', () => {
-    vi.mocked(useGetPokemonsQuery).mockReturnValue({
-      data: { items: [{ name: 'Pikachu', isSelected: false }] },
-      isLoading: false,
-      isError: false,
-      error: null,
-      isFetching: false,
-      refetch: vi.fn(),
-    });
+    const mockHandler = vi.fn();
 
     render(
       <Provider store={createTestStore()}>
@@ -207,47 +211,7 @@ describe('Main Component', () => {
 
     const checkbox = screen.getByRole('checkbox');
     fireEvent.click(checkbox);
-    expect(mockSetSearchParams).not.toHaveBeenCalled();
-  });
-  test('calls handleSelectPokemon and updates search params with correct value', () => {
-    vi.mocked(useGetPokemonsQuery).mockReturnValue({
-      data: { items: [{ name: 'Pikachu' }], totalPages: 1 },
-      isLoading: false,
-      isError: false,
-      error: null,
-      isFetching: false,
-      refetch: vi.fn(),
-    });
 
-    render(
-      <Provider store={createTestStore()}>
-        <Main searchQuery="" />
-      </Provider>
-    );
-
-    const pokemonItem = screen.getByText(/pikachu/i).closest('li');
-    expect(pokemonItem).toBeInTheDocument();
-
-    fireEvent.click(pokemonItem!);
-    expect(mockSetSearchParams).toHaveBeenCalledWith(expect.any(Function));
-
-    mockSetSearchParams.mock.calls[0][0](new URLSearchParams());
-    expect(mockSetSearchParams).toHaveBeenCalledWith(expect.any(Function));
-  });
-  test('calls setSearchParams to delete details when clicking on empty area', () => {
-    render(
-      <Provider store={createTestStore()}>
-        <Main searchQuery="" />
-      </Provider>
-    );
-
-    const pokemonList = screen.getByTestId('pokemon-list');
-    fireEvent.click(pokemonList);
-
-    expect(mockSetSearchParams).toHaveBeenCalledWith(expect.any(Function));
-    mockSetSearchParams.mock.calls[0][0](
-      new URLSearchParams({ details: 'Pikachu' })
-    );
-    expect(mockSetSearchParams).toHaveBeenCalledWith(expect.any(Function));
+    expect(mockHandler).not.toHaveBeenCalled();
   });
 });

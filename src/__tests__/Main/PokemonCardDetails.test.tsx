@@ -1,10 +1,12 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { vi } from 'vitest';
-import { useNavigate, useLocation } from 'react-router';
+import { Mock, vi } from 'vitest';
+import { useRouter } from 'next/router';
 import PokemonCardDetails from '@/components/Main/PokemonCardDetails';
 import { PokemonDetails } from '@/types/pokemonTypes';
 
-vi.mock('react-router');
+vi.mock('next/router', () => ({
+  useRouter: vi.fn(),
+}));
 
 describe('PokemonCardDetails Component', () => {
   const details: PokemonDetails = {
@@ -18,19 +20,17 @@ describe('PokemonCardDetails Component', () => {
     description: 'Height: 0.7m, Weight: 6.9kg',
   };
 
-  const mockNavigate = vi.fn();
+  const mockPush = vi.fn();
+  const mockQuery = { details: 'Bulbasaur' };
+  const mockRouter = {
+    query: mockQuery,
+    push: mockPush,
+    pathname: '/pokemons',
+  };
 
   beforeEach(() => {
-    vi.mocked(useNavigate).mockReturnValue(mockNavigate);
-    vi.mocked(useLocation).mockReturnValue({
-      search: '?details=Pikachu',
-      pathname: '/pokemons',
-      state: null,
-      key: 'default',
-      hash: '',
-    });
-
-    mockNavigate.mockClear();
+    (useRouter as Mock).mockReturnValue(mockRouter);
+    mockPush.mockClear();
   });
 
   test('renders the PokemonCardDetails component with given details', () => {
@@ -61,13 +61,16 @@ describe('PokemonCardDetails Component', () => {
     ).toBeInTheDocument();
   });
 
-  test('calls navigate with correct URL when close button is clicked', () => {
+  test('calls push with correct URL when close button is clicked', () => {
     render(<PokemonCardDetails details={details} />);
 
     const closeButton = screen.getByLabelText('Close');
     fireEvent.click(closeButton);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/pokemons?', { replace: true });
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/pokemons',
+      query: {},
+    });
   });
 
   test('does not show "details" in URL after close button click', () => {
@@ -76,6 +79,9 @@ describe('PokemonCardDetails Component', () => {
     const closeButton = screen.getByLabelText('Close');
     fireEvent.click(closeButton);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/pokemons?', { replace: true });
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/pokemons',
+      query: {},
+    });
   });
 });

@@ -124,7 +124,7 @@ describe('PokemonList Component', () => {
 
     const checkbox = screen.getAllByRole('checkbox')[0];
 
-    fireEvent.click(checkbox);
+    fireEvent.click(checkbox as HTMLInputElement);
     expect(store.getState().selectedPokemons.selected).toContain('bulbasaur');
   });
 });

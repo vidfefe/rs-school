@@ -7,7 +7,10 @@ interface SelectedPokemonsState {
 }
 
 const initialState: SelectedPokemonsState = {
-  selected: JSON.parse(localStorage.getItem('selectedPokemons') || '[]'),
+  selected:
+    typeof window !== 'undefined'
+      ? JSON.parse(localStorage.getItem('selectedPokemons') || '[]')
+      : [],
 };
 
 export const selectedPokemonsSlice = createSlice({
