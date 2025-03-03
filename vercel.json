@@ -4,7 +4,6 @@
         "src": "next.config.js",
         "use": "@vercel/next"
       }
-    ],
-    "outputDirectory": "dist"
+    ]
   }
   
