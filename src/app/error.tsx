@@ -1,3 +1,4 @@
+'use client';
 import { NextPage, NextPageContext } from 'next';
 
 interface ErrorProps {
@@ -7,7 +8,9 @@ interface ErrorProps {
 const ErrorPage: NextPage<ErrorProps> = ({ statusCode }) => {
   return (
     <div className="flex flex-col gap-5 justify-center items-center min-h-96">
-      <h1>{statusCode ? `Error ${statusCode}` : 'An error occurred'}</h1>
+      <h1 className="text-2xl font-bold">
+        {statusCode ? `Error ${statusCode}` : 'An error occurred'}
+      </h1>
       <p>Please try again later.</p>
     </div>
   );

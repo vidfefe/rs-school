@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import ErrorPage from '@/pages/_error';
+import ErrorPage from '@/app/error';
 import { vi } from 'vitest';
 
 vi.mock('next', () => ({
@@ -8,7 +8,7 @@ vi.mock('next', () => ({
 }));
 
 describe('ErrorPage', () => {
-  it('renders the correct error message when statusCode is provided', async () => {
+  test('renders the correct error message when statusCode is provided', async () => {
     const mockStatusCode = 404;
 
     const mockGetInitialProps = vi
@@ -23,7 +23,7 @@ describe('ErrorPage', () => {
     expect(screen.getByText('Please try again later.')).toBeInTheDocument();
   });
 
-  it('renders default error message when no statusCode is provided', async () => {
+  test('renders default error message when no statusCode is provided', async () => {
     const mockStatusCode = undefined;
 
     const mockGetInitialProps = vi

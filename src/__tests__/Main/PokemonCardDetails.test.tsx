@@ -1,11 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Mock, vi } from 'vitest';
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import PokemonCardDetails from '@/components/Main/PokemonCardDetails';
 import { PokemonDetails } from '@/types/pokemonTypes';
 
-vi.mock('next/router', () => ({
+vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
+  useSearchParams: vi.fn(),
+  usePathname: vi.fn(),
 }));
 
 describe('PokemonCardDetails Component', () => {
@@ -21,15 +23,16 @@ describe('PokemonCardDetails Component', () => {
   };
 
   const mockPush = vi.fn();
-  const mockQuery = { details: 'Bulbasaur' };
+  const mockSearchParams = new URLSearchParams({ details: 'Bulbasaur' });
+  const mockPathname = '/pokemons';
   const mockRouter = {
-    query: mockQuery,
     push: mockPush,
-    pathname: '/pokemons',
   };
 
   beforeEach(() => {
     (useRouter as Mock).mockReturnValue(mockRouter);
+    (useSearchParams as Mock).mockReturnValue(mockSearchParams);
+    (usePathname as Mock).mockReturnValue(mockPathname);
     mockPush.mockClear();
   });
 
@@ -67,21 +70,16 @@ describe('PokemonCardDetails Component', () => {
     const closeButton = screen.getByLabelText('Close');
     fireEvent.click(closeButton);
 
-    expect(mockPush).toHaveBeenCalledWith({
-      pathname: '/pokemons',
-      query: {},
-    });
+    const expectedUrl = `${mockPathname}?`;
+    expect(mockPush).toHaveBeenCalledWith(expectedUrl);
   });
 
-  test('does not show "details" in URL after close button click', () => {
+  test('removes "details" from URL after close button click', () => {
     render(<PokemonCardDetails details={details} />);
 
     const closeButton = screen.getByLabelText('Close');
     fireEvent.click(closeButton);
 
-    expect(mockPush).toHaveBeenCalledWith({
-      pathname: '/pokemons',
-      query: {},
-    });
+    expect(mockPush).toHaveBeenCalledWith(`${mockPathname}?`);
   });
 });

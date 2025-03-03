@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 interface PaginationProps {
   totalPages: number;
@@ -6,12 +6,17 @@ interface PaginationProps {
 
 const Pagination = ({ totalPages }: PaginationProps) => {
   const router = useRouter();
-  const { query, push } = router;
-  const page = Number(query.page) || 1;
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const page = Number(searchParams.get('page')) || 1;
 
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
-      push({ query: { ...query, page: newPage.toString() } });
+      const newSearchParams = new URLSearchParams(searchParams.toString());
+      newSearchParams.set('page', newPage.toString());
+      const newUrl = `${pathname}?${newSearchParams.toString()}`;
+      router.push(newUrl);
     }
   };
 

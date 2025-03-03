@@ -9,7 +9,7 @@ import { Provider } from 'react-redux';
 import { togglePokemon } from '@/store/selectedPokemonsSlice';
 
 describe('Flyout', () => {
-  it('is hidden when no Pokémon are selected', () => {
+  test('is hidden when no Pokémon are selected', () => {
     const store = createTestStore();
 
     render(
@@ -23,7 +23,7 @@ describe('Flyout', () => {
     expect(flyout.classList.contains('translate-y-full')).toBe(true);
   });
 
-  it('renders when Pokémon are selected', () => {
+  test('renders when Pokémon are selected', () => {
     const store = createTestStore();
 
     act(() => {
@@ -44,7 +44,7 @@ describe('Flyout', () => {
     expect(screen.getByText(/2 pokemons selected/i)).toBeInTheDocument();
   });
 
-  it('dispatches unselectAllPokemons action', async () => {
+  test('dispatches unselectAllPokemons action', async () => {
     const user = userEvent.setup();
     const store = createTestStore();
 
@@ -65,7 +65,7 @@ describe('Flyout', () => {
     expect(store.getState().selectedPokemons.selected).toHaveLength(0);
   });
 
-  it('calls downloadCsv with correct data', async () => {
+  test('calls downloadCsv with correct data', async () => {
     const user = userEvent.setup();
     const store = createTestStore();
 

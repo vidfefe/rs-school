@@ -1,3 +1,5 @@
+'use client';
+
 import PokemonCard from '@/components/Main/PokemonCard';
 import { togglePokemon } from '@/store/selectedPokemonsSlice';
 import { RootState } from '@/store/store';

@@ -1,3 +1,4 @@
+'use client';
 import { FC, MouseEvent } from 'react';
 import PokemonList from '@/components/Main/PokemonList';
 import { Pokemon } from '@/types/pokemonTypes';
@@ -9,7 +10,7 @@ import {
   useGetPokemonsQuery,
 } from '@/api/pokemonApi';
 import Error from '@/components/Error';
-import { useRouter } from 'next/router';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import PokemonCardDetails from './PokemonCardDetails';
 
 interface MainProps {
@@ -18,9 +19,10 @@ interface MainProps {
 
 const Main: FC<MainProps> = ({ searchQuery }) => {
   const router = useRouter();
-  const { query, push } = router;
-  const currentPage = Number(query.page || '1');
-  const details = query.details as string | undefined;
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentPage = Number(searchParams.get('page') || '1');
+  const details = searchParams.get('details') as string | undefined;
 
   const { data, isLoading, isError, error } = useGetPokemonsQuery({
     searchValue: searchQuery.trim(),
@@ -42,14 +44,18 @@ const Main: FC<MainProps> = ({ searchQuery }) => {
     if ((event.target as HTMLElement).closest('input[type="checkbox"]')) {
       return;
     }
-    push({ query: { ...query, details: pokemon.name } });
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('details', pokemon.name);
+    const newUrl = `${pathname}?${newSearchParams.toString()}`;
+    router.push(newUrl);
   };
 
   const handleUlClick = (event: MouseEvent<HTMLUListElement>) => {
     if (event.target === event.currentTarget) {
-      const newQuery = { ...query };
-      delete newQuery.details;
-      push({ query: newQuery });
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('details');
+      const newUrl = `${pathname}?${newSearchParams.toString()}`;
+      router.push(newUrl);
     }
   };
 

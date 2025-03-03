@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Mock, vi } from 'vitest';
-import { useRouter } from 'next/router';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Provider } from 'react-redux';
 import { createTestStore } from '@/utils/testUtils';
 import Main from '@/components/Main/Main';
@@ -10,16 +10,21 @@ import {
 } from '@/api/pokemonApi';
 import { PokemonDetails } from '@/types/pokemonTypes';
 
-vi.mock('next/router', () => ({
+// Mocks for Next.js navigation
+vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
+  usePathname: vi.fn(),
+  useSearchParams: vi.fn(),
 }));
 
+// Mock for PokemonCardDetails component
 vi.mock('@/components/PokemonCardDetails', () => ({
   default: ({ details }: { details: PokemonDetails }) => (
     <div>{details.name}</div>
   ),
 }));
 
+// Mock for API requests
 vi.mock('@/api/pokemonApi', async () => {
   const actual =
     await vi.importActual<typeof import('@/api/pokemonApi')>(
@@ -27,13 +32,6 @@ vi.mock('@/api/pokemonApi', async () => {
     );
   return {
     ...actual,
-    pokemonApi: {
-      reducerPath: 'pokemonApi',
-      reducer: (state = {}) => state,
-      middleware:
-        () => (next: (action: unknown) => void) => (action: unknown) =>
-          next(action),
-    },
     useGetPokemonsQuery: vi.fn(),
     useGetPokemonDetailsQuery: vi.fn(),
   };
@@ -41,40 +39,47 @@ vi.mock('@/api/pokemonApi', async () => {
 
 describe('Main Component', () => {
   const mockPush = vi.fn();
+  const mockSearchParams = new URLSearchParams();
 
   beforeEach(() => {
-    (useRouter as Mock).mockReturnValue({
-      query: {},
-      push: mockPush,
-    });
-    vi.mocked(useGetPokemonsQuery).mockReturnValue({
-      data: { items: [], totalPages: 1 },
-      isLoading: false,
-      isError: false,
-      error: null,
-      isFetching: false,
-      refetch: vi.fn(),
-    });
-    vi.mocked(useGetPokemonDetailsQuery).mockReturnValue({
-      data: null,
-      isLoading: false,
-      isError: false,
-      error: null,
-      refetch: vi.fn(),
-    });
+    (useRouter as Mock).mockReturnValue({ push: mockPush });
+    (usePathname as Mock).mockReturnValue('/');
+    (useSearchParams as Mock).mockReturnValue(mockSearchParams);
+
+    mockPokemonsQuery([]);
+    mockPokemonDetailsQuery(null);
   });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
+  function mockPokemonsQuery(items: { name: string }[], totalPages = 1) {
+    vi.mocked(useGetPokemonsQuery).mockReturnValue({
+      data: { items, totalPages },
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    });
+  }
+
+  function mockPokemonDetailsQuery(data: PokemonDetails | null) {
+    vi.mocked(useGetPokemonDetailsQuery).mockReturnValue({
+      data,
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+      refetch: vi.fn(),
+    });
+  }
+
   test('renders Loader when data is loading', () => {
     vi.mocked(useGetPokemonsQuery).mockReturnValue({
       data: null,
       isLoading: true,
       isError: false,
-      error: null,
-      isFetching: true,
+      isFetching: false,
       refetch: vi.fn(),
     });
 
@@ -83,6 +88,7 @@ describe('Main Component', () => {
         <Main searchQuery="" />
       </Provider>
     );
+
     expect(screen.getByTestId('loader')).toBeInTheDocument();
   });
 
@@ -101,36 +107,22 @@ describe('Main Component', () => {
         <Main searchQuery="" />
       </Provider>
     );
+
     expect(screen.getByText(/failed to fetch data/i)).toBeInTheDocument();
   });
 
   test('renders NoResults when there are no Pokémon', () => {
-    vi.mocked(useGetPokemonsQuery).mockReturnValue({
-      data: { items: [], totalPages: 1 },
-      isLoading: false,
-      isError: false,
-      error: null,
-      isFetching: false,
-      refetch: vi.fn(),
-    });
-
     render(
       <Provider store={createTestStore()}>
         <Main searchQuery="" />
       </Provider>
     );
+
     expect(screen.getByTestId('no-results')).toBeInTheDocument();
   });
 
   test('renders PokemonList and Pagination when data is available', () => {
-    vi.mocked(useGetPokemonsQuery).mockReturnValue({
-      data: { items: [{ name: 'Pikachu' }], totalPages: 2 },
-      isLoading: false,
-      isError: false,
-      error: null,
-      isFetching: false,
-      refetch: vi.fn(),
-    });
+    mockPokemonsQuery([{ name: 'Pikachu' }], 2);
 
     render(
       <Provider store={createTestStore()}>
@@ -142,15 +134,8 @@ describe('Main Component', () => {
     expect(screen.getByTestId('pagination')).toBeInTheDocument();
   });
 
-  test('calls handleSelectPokemon and updates search params', () => {
-    vi.mocked(useGetPokemonsQuery).mockReturnValue({
-      data: { items: [{ name: 'Pikachu' }], totalPages: 1 },
-      isLoading: false,
-      isError: false,
-      error: null,
-      isFetching: false,
-      refetch: vi.fn(),
-    });
+  test('updates search params when a Pokémon is selected', () => {
+    mockPokemonsQuery([{ name: 'Pikachu' }]);
 
     render(
       <Provider store={createTestStore()}>
@@ -159,26 +144,14 @@ describe('Main Component', () => {
     );
 
     const pokemonItem = screen.getByText(/pikachu/i).closest('li');
-    expect(pokemonItem).toBeInTheDocument();
-
     fireEvent.click(pokemonItem!);
-    expect(mockPush).toHaveBeenCalledWith({ query: { details: 'Pikachu' } });
+
+    expect(mockPush).toHaveBeenCalledWith('/?details=Pikachu');
   });
 
-  test('calls handleUlClick and removes details from search params', () => {
-    vi.mocked(useGetPokemonsQuery).mockReturnValue({
-      data: { items: [{ name: 'Pikachu' }], totalPages: 1 },
-      isLoading: false,
-      isError: false,
-      error: null,
-      isFetching: false,
-      refetch: vi.fn(),
-    });
-
-    (useRouter as Mock).mockReturnValue({
-      query: { details: 'pikachu' },
-      push: mockPush,
-    });
+  test('removes details from search params when clicking outside', () => {
+    mockPokemonsQuery([{ name: 'Pikachu' }]);
+    mockSearchParams.set('details', 'Pikachu');
 
     render(
       <Provider store={createTestStore()}>
@@ -186,22 +159,14 @@ describe('Main Component', () => {
       </Provider>
     );
 
-    const ulElement = screen.getByTestId('pokemon-list');
-    fireEvent.click(ulElement);
+    const pokemonList = screen.getByTestId('pokemon-list');
+    fireEvent.click(pokemonList);
 
-    expect(mockPush).toHaveBeenCalledWith({ query: {} });
+    expect(mockPush).toHaveBeenCalledWith(expect.stringMatching(/^\/\??$/));
   });
 
-  test('does not trigger action if clicked on a checkbox', () => {
-    vi.mocked(useGetPokemonsQuery).mockReturnValue({
-      data: { items: [{ name: 'Pikachu' }], totalPages: 1 },
-      isLoading: false,
-      isError: false,
-      error: null,
-      isFetching: false,
-      refetch: vi.fn(),
-    });
-    const mockHandler = vi.fn();
+  test('does not trigger selection when clicking on a checkbox', () => {
+    mockPokemonsQuery([{ name: 'Pikachu' }]);
 
     render(
       <Provider store={createTestStore()}>
@@ -212,6 +177,6 @@ describe('Main Component', () => {
     const checkbox = screen.getByRole('checkbox');
     fireEvent.click(checkbox);
 
-    expect(mockHandler).not.toHaveBeenCalled();
+    expect(mockPush).not.toHaveBeenCalled();
   });
 });

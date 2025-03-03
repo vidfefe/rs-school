@@ -1,5 +1,5 @@
 import { PokemonDetails } from '@/types/pokemonTypes';
-import { useRouter } from 'next/router';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { FC } from 'react';
 
 interface PokemonCardDetailsProps {
@@ -8,13 +8,14 @@ interface PokemonCardDetailsProps {
 
 const PokemonCardDetails: FC<PokemonCardDetailsProps> = ({ details }) => {
   const router = useRouter();
-  const { query, push, pathname } = router;
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   const handleClose = () => {
-    const newQuery = { ...query };
-    delete newQuery.details;
-
-    push({ pathname, query: newQuery });
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    newSearchParams.delete('details');
+    const newUrl = `${pathname}?${newSearchParams.toString()}`;
+    router.push(newUrl);
   };
 
   return (

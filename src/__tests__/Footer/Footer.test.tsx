@@ -3,7 +3,7 @@ import Footer from '@/components/Footer/Footer';
 import { renderWithStore } from '@/utils/testUtils';
 
 describe('Footer', () => {
-  it('renders ErrorButton and Flyout', () => {
+  test('renders ErrorButton and Flyout', () => {
     render(renderWithStore(<Footer />));
 
     expect(screen.getByRole('button', { name: /error/i })).toBeInTheDocument();

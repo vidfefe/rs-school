@@ -21,7 +21,7 @@ describe('ThemeProvider and ThemeContext', () => {
     document.documentElement.classList.remove('dark');
   });
 
-  it('provides default theme from localStorage or light if not set', () => {
+  test('provides default theme from localStorage or light if not set', () => {
     localStorage.setItem('theme', 'dark');
 
     render(
@@ -36,7 +36,7 @@ describe('ThemeProvider and ThemeContext', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(true);
   });
 
-  it('toggles theme between light and dark', async () => {
+  test('toggles theme between light and dark', async () => {
     const user = userEvent.setup();
 
     render(
@@ -68,7 +68,7 @@ describe('ThemeProvider and ThemeContext', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(false);
     expect(localStorage.getItem('theme')).toBe('light');
   });
-  it('toggles theme using ThemeToggle component', async () => {
+  test('toggles theme using ThemeToggle component', async () => {
     const user = userEvent.setup();
 
     render(
@@ -93,7 +93,7 @@ describe('ThemeProvider and ThemeContext', () => {
     expect(localStorage.getItem('theme')).toBe('light');
   });
 
-  it('throws an error if useTheme is used outside ThemeProvider', () => {
+  test('throws an error if useTheme is used outside ThemeProvider', () => {
     const consoleErrorMock = vi
       .spyOn(console, 'error')
       .mockImplementation(() => {});

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
@@ -40,7 +40,7 @@ beforeEach(() => {
 });
 
 describe('PokemonList Component', () => {
-  it('renders provided Pokemon', () => {
+  test('renders provided Pokemon', () => {
     render(
       <Provider store={store}>
         <PokemonList
@@ -55,7 +55,7 @@ describe('PokemonList Component', () => {
     expect(screen.getByText(/ivysaur/i)).toBeDefined();
   });
 
-  it('calls onSelectPokemon when clicking a Pokemon', () => {
+  test('calls onSelectPokemon when clicking a Pokemon', () => {
     const onSelectPokemon = vi.fn();
 
     render(
@@ -74,7 +74,7 @@ describe('PokemonList Component', () => {
     expect(onSelectPokemon).toHaveBeenCalled();
   });
 
-  it('marks selected Pokemon correctly', () => {
+  test('marks selected Pokemon correctly', () => {
     store.dispatch(togglePokemon('bulbasaur'));
 
     render(
@@ -92,7 +92,7 @@ describe('PokemonList Component', () => {
     expect((checkbox as HTMLInputElement).checked).toBe(true);
   });
 
-  it('calls onUIClick when clicking on the list', () => {
+  test('calls onUIClick when clicking on the list', () => {
     const onUIClick = vi.fn();
 
     render(
@@ -111,7 +111,7 @@ describe('PokemonList Component', () => {
     expect(onUIClick).toHaveBeenCalled();
   });
 
-  it('dispatches togglePokemon when a Pokemon is selected', () => {
+  test('dispatches togglePokemon when a Pokemon is selected', () => {
     render(
       <Provider store={store}>
         <PokemonList

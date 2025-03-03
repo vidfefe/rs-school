@@ -1,3 +1,4 @@
+'use client';
 import { unselectAllPokemons } from '@/store/selectedPokemonsSlice';
 import { RootState } from '@/store/store';
 import { CsvData, downoloadCsv } from '@/utils/downloadCsv';

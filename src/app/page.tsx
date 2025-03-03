@@ -1,12 +1,16 @@
+'use client';
 import { useEffect, useState } from 'react';
 import { useSearchQuery } from '../hooks/useSearchQuery';
 import Header from '@/components/Header/Header';
+
 import Main from '@/components/Main/Main';
 import Footer from '@/components/Footer/Footer';
-import { useRouter } from 'next/router';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 const HomePage = () => {
-  const { push } = useRouter();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [searchValue, setSearchValue] = useSearchQuery('searchValue');
   const [queryValue, setQueryValue] = useState<string>('');
 
@@ -19,7 +23,10 @@ const HomePage = () => {
   const handleSearch = (value: string) => {
     setSearchValue(value.trim());
     setQueryValue(value.trim());
-    push({ query: { page: '1' } });
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('page', '1');
+    const newUrl = `${pathname}?${newSearchParams.toString()}`;
+    router.push(newUrl);
   };
 
   return (
