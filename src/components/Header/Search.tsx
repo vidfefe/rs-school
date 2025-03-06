@@ -1,19 +1,20 @@
+import { useSearchQuery } from '@/hooks/useSearchQuery';
+import { useRouter } from 'next/router';
 import React, { ChangeEvent, useState } from 'react';
 
-interface SearchProps {
-  onSearch: (searchValue: string) => void;
-  initialValue?: string;
-}
-
-const Search: React.FC<SearchProps> = ({ onSearch, initialValue = '' }) => {
-  const [searchValue, setSearchValue] = useState(initialValue);
+const Search = () => {
+  const { push } = useRouter();
+  const [searchValue, setSearchValue] = useSearchQuery('searchValue');
+  const [inputValue, setInputValue] = useState<string>(searchValue || '');
+  console.log(searchValue);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(event.target.value);
+    setInputValue(event.target.value);
   };
 
   const handleSearch = () => {
-    onSearch(searchValue);
+    setSearchValue(inputValue.trim());
+    push({ query: { page: '1' } });
   };
 
   return (
@@ -24,13 +25,13 @@ const Search: React.FC<SearchProps> = ({ onSearch, initialValue = '' }) => {
         className="border border-gray-300 focus:outline-rose-600 rounded p-1"
         placeholder="Enter name..."
         onChange={handleInputChange}
-        value={searchValue}
+        value={inputValue}
       />
       <button
         type="button"
         data-testid="search-button"
         className="bg-rose-600 font-semibold rounded px-3 py-1"
-        onClick={handleSearch}
+        onClick={() => handleSearch()}
       >
         Search
       </button>

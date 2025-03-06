@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, Mock } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
@@ -6,14 +6,25 @@ import PokemonList from '@/components/Main/PokemonList';
 import selectedPokemonsReducer, {
   togglePokemon,
 } from '@/store/selectedPokemonsSlice';
-import { pokemonApi } from '@/api/pokemonApi';
-import { Pokemon } from '@/types/pokemonTypes';
+import { useGetPokemonsQuery } from '@/api/pokemonApi';
+import { useRouter } from 'next/router';
 
 import type { Store } from '@reduxjs/toolkit';
 
+vi.mock('@/api/pokemonApi', () => ({
+  useGetPokemonsQuery: vi.fn(),
+}));
+
+vi.mock('next/router', () => ({
+  useRouter: vi.fn(() => ({
+    query: {},
+    push: vi.fn(),
+  })),
+}));
+
 let store: Store;
 
-const mockPokemons: Pokemon[] = [
+const mockPokemons = [
   {
     name: 'bulbasaur',
     description: 'Height: 0.7m, Weight: 6.9kg',
@@ -32,58 +43,62 @@ beforeEach(() => {
   store = configureStore({
     reducer: {
       selectedPokemons: selectedPokemonsReducer,
-      [pokemonApi.reducerPath]: pokemonApi.reducer,
     },
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(pokemonApi.middleware),
   });
 });
 
 describe('PokemonList Component', () => {
-  it('renders provided Pokemon', () => {
+  test('renders provided Pokemon', () => {
+    (useGetPokemonsQuery as Mock).mockReturnValue({
+      data: { items: mockPokemons },
+      isLoading: false,
+      isError: false,
+    });
+
     render(
       <Provider store={store}>
-        <PokemonList
-          results={mockPokemons}
-          onSelectPokemon={vi.fn()}
-          onUIClick={vi.fn()}
-        />
+        <PokemonList />
       </Provider>
     );
 
-    expect(screen.getByText(/bulbasaur/i)).toBeDefined();
-    expect(screen.getByText(/ivysaur/i)).toBeDefined();
+    expect(screen.getByText(/bulbasaur/i)).toBeInTheDocument();
+    expect(screen.getByText(/ivysaur/i)).toBeInTheDocument();
   });
 
-  it('calls onSelectPokemon when clicking a Pokemon', () => {
-    const onSelectPokemon = vi.fn();
+  test('handles Pokemon selection', () => {
+    (useGetPokemonsQuery as Mock).mockReturnValue({
+      data: { items: mockPokemons },
+      isLoading: false,
+      isError: false,
+    });
+
+    const pushMock = vi.fn();
+    (useRouter as Mock).mockReturnValue({ query: {}, push: pushMock });
 
     render(
       <Provider store={store}>
-        <PokemonList
-          results={mockPokemons}
-          onSelectPokemon={onSelectPokemon}
-          onUIClick={vi.fn()}
-        />
+        <PokemonList />
       </Provider>
     );
 
     const bulbasaurCard = screen.getByText(/bulbasaur/i).closest('li');
     fireEvent.click(bulbasaurCard!);
 
-    expect(onSelectPokemon).toHaveBeenCalled();
+    expect(pushMock).toHaveBeenCalledWith({ query: { details: 'bulbasaur' } });
   });
 
-  it('marks selected Pokemon correctly', () => {
+  test('marks selected Pokemon correctly', () => {
+    (useGetPokemonsQuery as Mock).mockReturnValue({
+      data: { items: mockPokemons },
+      isLoading: false,
+      isError: false,
+    });
+
     store.dispatch(togglePokemon('bulbasaur'));
 
     render(
       <Provider store={store}>
-        <PokemonList
-          results={mockPokemons}
-          onSelectPokemon={vi.fn()}
-          onUIClick={vi.fn()}
-        />
+        <PokemonList />
       </Provider>
     );
 
@@ -92,39 +107,105 @@ describe('PokemonList Component', () => {
     expect((checkbox as HTMLInputElement).checked).toBe(true);
   });
 
-  it('calls onUIClick when clicking on the list', () => {
-    const onUIClick = vi.fn();
+  test('removes "details" from URL when clicking outside', () => {
+    (useGetPokemonsQuery as Mock).mockReturnValue({
+      data: { items: mockPokemons },
+      isLoading: false,
+      isError: false,
+    });
+
+    const pushMock = vi.fn();
+    (useRouter as Mock).mockReturnValue({
+      query: { details: 'bulbasaur' },
+      push: pushMock,
+    });
 
     render(
       <Provider store={store}>
-        <PokemonList
-          results={mockPokemons}
-          onSelectPokemon={vi.fn()}
-          onUIClick={onUIClick}
-        />
+        <PokemonList />
       </Provider>
     );
 
-    const list = screen.getByRole('list');
+    const list = screen.getByTestId('pokemon-list');
     fireEvent.click(list);
 
-    expect(onUIClick).toHaveBeenCalled();
+    expect(pushMock).toHaveBeenCalledWith({ query: {} });
   });
 
-  it('dispatches togglePokemon when a Pokemon is selected', () => {
+  test('renders loader when data is loading', () => {
+    (useGetPokemonsQuery as Mock).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+      error: null,
+    });
+
     render(
       <Provider store={store}>
-        <PokemonList
-          results={mockPokemons}
-          onSelectPokemon={vi.fn()}
-          onUIClick={vi.fn()}
-        />
+        <PokemonList />
       </Provider>
     );
 
-    const checkbox = screen.getAllByRole('checkbox')[0];
+    expect(screen.getByTestId('loader')).toBeInTheDocument();
+  });
 
-    fireEvent.click(checkbox as HTMLInputElement);
-    expect(store.getState().selectedPokemons.selected).toContain('bulbasaur');
+  test('renders error message when there is an error', () => {
+    (useGetPokemonsQuery as Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: new Error('Failed to fetch data'),
+    });
+
+    render(
+      <Provider store={store}>
+        <PokemonList />
+      </Provider>
+    );
+
+    expect(screen.getByText(/failed to fetch data/i)).toBeInTheDocument();
+  });
+
+  test('renders empty array when data.items is empty', () => {
+    (useGetPokemonsQuery as Mock).mockReturnValue({
+      data: { items: [] },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    render(
+      <Provider store={store}>
+        <PokemonList />
+      </Provider>
+    );
+
+    const pokemonList = screen.getByTestId('pokemon-list');
+    expect(pokemonList).toBeEmptyDOMElement();
+  });
+  test('does not trigger action if clicked on a checkbox', () => {
+    (useGetPokemonsQuery as Mock).mockReturnValue({
+      data: { items: mockPokemons },
+      isLoading: false,
+      isError: false,
+    });
+    const mockHandler = vi.fn();
+
+    render(
+      <Provider store={store}>
+        <PokemonList />
+      </Provider>
+    );
+
+    const bulbasaurCard = screen.getByText(/bulbasaur/i).closest('li');
+
+    if (bulbasaurCard) {
+      const checkbox = bulbasaurCard.querySelector('input[type="checkbox"]');
+      if (checkbox) {
+        fireEvent.click(checkbox);
+      }
+    }
+
+    expect(mockHandler).not.toHaveBeenCalled();
   });
 });

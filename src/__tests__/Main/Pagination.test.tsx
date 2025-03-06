@@ -1,10 +1,15 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi, Mock } from 'vitest';
 import { useRouter } from 'next/router';
+import { useGetPokemonsQuery } from '@/api/pokemonApi';
 import Pagination from '@/components/Main/Pagination';
 
 vi.mock('next/router', () => ({
   useRouter: vi.fn(),
+}));
+
+vi.mock('@/api/pokemonApi', () => ({
+  useGetPokemonsQuery: vi.fn(),
 }));
 
 describe('Pagination Component', () => {
@@ -14,64 +19,92 @@ describe('Pagination Component', () => {
   beforeEach(() => {
     mockPush.mockClear();
     (useRouter as Mock).mockReturnValue({
-      query: { page: '1', details: 'some-detail' },
+      query: { page: '1', details: 'pikachu' },
       push: mockPush,
+    });
+
+    (useGetPokemonsQuery as Mock).mockReturnValue({
+      data: { totalPages },
+      isLoading: false,
+      isError: false,
     });
   });
 
-  test('renders pagination with correct initial state', () => {
-    render(<Pagination totalPages={totalPages} />);
+  test('uses page=1 by default if the parameter is missing', () => {
+    (useRouter as Mock).mockReturnValue({
+      query: { details: 'pikachu' },
+      push: mockPush,
+    });
 
+    render(<Pagination />);
     expect(screen.getByText('1 / 5')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '<' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: '>' })).toBeEnabled();
+  });
+
+  test('passes currentPage to useGetPokemonsQuery', () => {
+    (useRouter as Mock).mockReturnValue({
+      query: { page: '3', details: 'pikachu' },
+      push: mockPush,
+    });
+
+    render(<Pagination />);
+
+    expect(useGetPokemonsQuery).toHaveBeenCalledWith({
+      searchValue: '',
+      currentPage: 3,
+    });
+  });
+
+  test('uses totalPages = 1 if data is missing', () => {
+    (useGetPokemonsQuery as Mock).mockReturnValue({
+      data: null,
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<Pagination />);
+    expect(screen.getByText('1 / 1')).toBeInTheDocument();
   });
 
   test('handles page change when clicking next', () => {
-    render(<Pagination totalPages={totalPages} />);
+    render(<Pagination />);
 
     fireEvent.click(screen.getByRole('button', { name: '>' }));
 
     expect(mockPush).toHaveBeenCalledWith({
-      query: { page: '2', details: 'some-detail' },
+      query: { page: '2', details: 'pikachu' },
     });
   });
 
   test('handles page change when clicking previous', () => {
     (useRouter as Mock).mockReturnValue({
-      query: { page: '2', details: 'some-detail' },
+      query: { page: '2', details: 'pikachu' },
       push: mockPush,
     });
 
-    render(<Pagination totalPages={totalPages} />);
+    render(<Pagination />);
 
     fireEvent.click(screen.getByRole('button', { name: '<' }));
 
     expect(mockPush).toHaveBeenCalledWith({
-      query: { page: '1', details: 'some-detail' },
+      query: { page: '1', details: 'pikachu' },
     });
   });
 
-  test('does not allow page change when on first or last page', () => {
-    (useRouter as Mock).mockReturnValue({
-      query: { page: '1', details: 'some-detail' },
-      push: mockPush,
-    });
-
-    render(<Pagination totalPages={totalPages} />);
+  test('does not allow page change when on the first page', () => {
+    render(<Pagination />);
 
     fireEvent.click(screen.getByRole('button', { name: '<' }));
 
     expect(mockPush).not.toHaveBeenCalled();
   });
 
-  test('does not allow page change when on last page', () => {
+  test('does not allow page change when on the last page', () => {
     (useRouter as Mock).mockReturnValue({
-      query: { page: '5', details: 'some-detail' },
+      query: { page: '5', details: 'pikachu' },
       push: mockPush,
     });
 
-    render(<Pagination totalPages={totalPages} />);
+    render(<Pagination />);
 
     fireEvent.click(screen.getByRole('button', { name: '>' }));
 
@@ -80,31 +113,31 @@ describe('Pagination Component', () => {
 
   test('handles page change when on page 3', () => {
     (useRouter as Mock).mockReturnValue({
-      query: { page: '3', details: 'some-detail' },
+      query: { page: '3', details: 'pikachu' },
       push: mockPush,
     });
 
-    render(<Pagination totalPages={totalPages} />);
+    render(<Pagination />);
 
     fireEvent.click(screen.getByRole('button', { name: '<' }));
 
     expect(mockPush).toHaveBeenCalledWith({
-      query: { page: '2', details: 'some-detail' },
+      query: { page: '2', details: 'pikachu' },
     });
   });
 
   test('handles page change to the last page', () => {
     (useRouter as Mock).mockReturnValue({
-      query: { page: '4', details: 'some-detail' },
+      query: { page: '4', details: 'pikachu' },
       push: mockPush,
     });
 
-    render(<Pagination totalPages={totalPages} />);
+    render(<Pagination />);
 
     fireEvent.click(screen.getByRole('button', { name: '>' }));
 
     expect(mockPush).toHaveBeenCalledWith({
-      query: { page: '5', details: 'some-detail' },
+      query: { page: '5', details: 'pikachu' },
     });
   });
 });

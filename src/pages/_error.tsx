@@ -1,21 +1,18 @@
-import { NextPage, NextPageContext } from 'next';
+import { notFound } from 'next/navigation';
 
-interface ErrorProps {
+interface ErrorPageProps {
   statusCode?: number;
 }
 
-const ErrorPage: NextPage<ErrorProps> = ({ statusCode }) => {
+export default function ErrorPage({ statusCode = 500 }: ErrorPageProps) {
+  if (statusCode === 404) {
+    notFound();
+  }
+
   return (
     <div className="flex flex-col gap-5 justify-center items-center min-h-96">
-      <h1>{statusCode ? `Error ${statusCode}` : 'An error occurred'}</h1>
-      <p>Please try again later.</p>
+      <h1 className="text-2xl font-bold">{`Error ${statusCode}`}</h1>
+      <p>Please try again later</p>
     </div>
   );
-};
-
-ErrorPage.getInitialProps = ({ res, err }: NextPageContext) => {
-  const statusCode = res?.statusCode || err?.statusCode || 500;
-  return { statusCode };
-};
-
-export default ErrorPage;
+}

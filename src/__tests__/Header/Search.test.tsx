@@ -1,34 +1,37 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { vi } from 'vitest';
-import Header from '@/components/Header/Header';
-import { ThemeProvider } from '@/context/ThemeContext';
+import { useRouter } from 'next/router';
+import Search from '@/components/Header/Search';
+import { Mock, vi } from 'vitest';
 
-describe('Header Component', () => {
-  test('renders Header component with Search and ThemeToggle', () => {
-    render(
-      <ThemeProvider>
-        <Header onSearch={() => {}} />
-      </ThemeProvider>
-    );
+vi.mock('next/router', () => ({
+  useRouter: vi.fn(),
+}));
 
-    const title = screen.getByText(/Pokémon Search/i);
-    const searchInput = screen.getByTestId('search-input');
-    const searchButton = screen.getByTestId('search-button');
-    const themeToggleButton = screen.getByRole('button', { name: /🌞|🌙/i });
+describe('Search Component', () => {
+  const mockPush = vi.fn();
 
-    expect(title).toBeInTheDocument();
-    expect(searchInput).toBeInTheDocument();
-    expect(searchButton).toBeInTheDocument();
-    expect(themeToggleButton).toBeInTheDocument();
+  beforeEach(() => {
+    (useRouter as Mock).mockReturnValue({
+      push: mockPush,
+      query: {},
+    });
   });
 
-  test('calls onSearch when search value changes', async () => {
-    const mockOnSearch = vi.fn();
-    render(
-      <ThemeProvider>
-        <Header onSearch={mockOnSearch} />
-      </ThemeProvider>
-    );
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test('updates input value on change', () => {
+    render(<Search />);
+
+    const searchInput = screen.getByTestId('search-input');
+    fireEvent.change(searchInput, { target: { value: 'charizard' } });
+
+    expect((searchInput as HTMLInputElement).value).toBe('charizard');
+  });
+
+  test('calls router.push with correct query object on search', () => {
+    render(<Search />);
 
     const searchInput = screen.getByTestId('search-input');
     const searchButton = screen.getByTestId('search-button');
@@ -36,18 +39,6 @@ describe('Header Component', () => {
     fireEvent.change(searchInput, { target: { value: 'charizard' } });
     fireEvent.click(searchButton);
 
-    expect(mockOnSearch).toHaveBeenCalled();
-    expect(mockOnSearch).toHaveBeenCalledWith('charizard');
-  });
-
-  test('renders Header with default initialValue', () => {
-    render(
-      <ThemeProvider>
-        <Header onSearch={() => {}} initialValue="bulbasaur" />
-      </ThemeProvider>
-    );
-
-    const searchInput = screen.getByTestId('search-input');
-    expect((searchInput as HTMLInputElement).value).toBe('bulbasaur');
+    expect(mockPush).toHaveBeenCalledWith({ query: { page: '1' } });
   });
 });

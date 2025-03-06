@@ -5,14 +5,12 @@ import { useEffect, useState } from 'react';
 export const useSearchQuery = (
   key: string
 ): [string, React.Dispatch<React.SetStateAction<string>>] => {
-  const [searchValue, setSearchValue] = useState<string>('');
-
-  useEffect(() => {
+  const [searchValue, setSearchValue] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      const storedValue = localStorage.getItem(key) || '';
-      setSearchValue(storedValue);
+      return localStorage.getItem(key) || '';
     }
-  }, [key]);
+    return '';
+  });
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
