@@ -1,15 +1,21 @@
+'use client';
+import { useGetPokemonsQuery } from '@/api/pokemonApi';
+import { useSearchQuery } from '@/hooks/useSearchQuery';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-interface PaginationProps {
-  totalPages: number;
-}
-
-const Pagination = ({ totalPages }: PaginationProps) => {
+const Pagination = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [searchValue] = useSearchQuery('searchValue');
+  const currentPage = Number(searchParams.get('page') || '1');
 
-  const page = Number(searchParams.get('page')) || 1;
+  const { data } = useGetPokemonsQuery({
+    searchValue,
+    currentPage,
+  });
+
+  const { totalPages } = data || { totalPages: 1 };
 
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -25,31 +31,31 @@ const Pagination = ({ totalPages }: PaginationProps) => {
       <button
         type="button"
         className={`group px-3 py-1 rounded font-bold border-2 transition-all ${
-          page === 1
+          currentPage === 1
             ? 'border-gray-300 cursor-not-allowed '
             : 'bg-rose-600 border-rose-600 hover:bg-transparent'
         }`}
-        disabled={page === 1}
-        onClick={() => handlePageChange(page - 1)}
+        disabled={currentPage === 1}
+        onClick={() => handlePageChange(currentPage - 1)}
       >
-        <span className={`${page !== 1 && 'group-hover:text-rose-600'}`}>
+        <span className={`${currentPage !== 1 && 'group-hover:text-rose-600'}`}>
           {'<'}
         </span>
       </button>
       <span className="px-4 py-1 text-lg">
-        {page} / {totalPages}
+        {currentPage} / {totalPages}
       </span>
       <button
         className={` group  px-3 py-1 rounded font-bold border-2 transition-all ${
-          page === totalPages
+          currentPage === totalPages
             ? 'border-gray-300 cursor-not-allowed'
             : 'bg-rose-600 border-rose-600 hover:bg-transparent'
         }`}
-        disabled={page === totalPages}
-        onClick={() => handlePageChange(page + 1)}
+        disabled={currentPage === totalPages}
+        onClick={() => handlePageChange(currentPage + 1)}
       >
         <span
-          className={`${page !== totalPages && 'group-hover:text-rose-600'}`}
+          className={`${currentPage !== totalPages && 'group-hover:text-rose-600'}`}
         >
           {'>'}
         </span>

@@ -1,19 +1,25 @@
+'use client';
+import { useSearchQuery } from '@/hooks/useSearchQuery';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import React, { ChangeEvent, useState } from 'react';
 
-interface SearchProps {
-  onSearch: (searchValue: string) => void;
-  initialValue?: string;
-}
-
-const Search: React.FC<SearchProps> = ({ onSearch, initialValue = '' }) => {
-  const [searchValue, setSearchValue] = useState(initialValue);
-
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(event.target.value);
-  };
+const Search = () => {
+  const [searchValue, setSearchValue] = useSearchQuery('searchValue');
+  const [inputValue, setInputValue] = useState<string>(searchValue || '');
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
 
   const handleSearch = () => {
-    onSearch(searchValue);
+    setSearchValue(inputValue.trim());
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('page', '1');
+    const newUrl = `${pathname}?${newSearchParams.toString()}`;
+    router.push(newUrl);
+  };
+
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
   };
 
   return (
@@ -24,13 +30,13 @@ const Search: React.FC<SearchProps> = ({ onSearch, initialValue = '' }) => {
         className="border border-gray-300 focus:outline-rose-600 rounded p-1"
         placeholder="Enter name..."
         onChange={handleInputChange}
-        value={searchValue}
+        value={inputValue}
       />
       <button
         type="button"
         data-testid="search-button"
         className="bg-rose-600 font-semibold rounded px-3 py-1"
-        onClick={handleSearch}
+        onClick={() => handleSearch()}
       >
         Search
       </button>

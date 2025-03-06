@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Mock, vi } from 'vitest';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useGetPokemonDetailsQuery } from '@/api/pokemonApi';
 import PokemonCardDetails from '@/components/Main/PokemonCardDetails';
-import { PokemonDetails } from '@/types/pokemonTypes';
 
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
@@ -10,8 +10,12 @@ vi.mock('next/navigation', () => ({
   usePathname: vi.fn(),
 }));
 
+vi.mock('@/api/pokemonApi', () => ({
+  useGetPokemonDetailsQuery: vi.fn(),
+}));
+
 describe('PokemonCardDetails Component', () => {
-  const details: PokemonDetails = {
+  const details = {
     name: 'Bulbasaur',
     image:
       'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png',
@@ -19,25 +23,49 @@ describe('PokemonCardDetails Component', () => {
     weight: 69,
     type: 'grass, poison',
     abilities: ['overgrow', 'chlorophyll'],
-    description: 'Height: 0.7m, Weight: 6.9kg',
   };
 
   const mockPush = vi.fn();
-  const mockSearchParams = new URLSearchParams({ details: 'Bulbasaur' });
   const mockPathname = '/pokemons';
-  const mockRouter = {
-    push: mockPush,
-  };
 
   beforeEach(() => {
-    (useRouter as Mock).mockReturnValue(mockRouter);
-    (useSearchParams as Mock).mockReturnValue(mockSearchParams);
+    (useRouter as Mock).mockReturnValue({ push: mockPush });
     (usePathname as Mock).mockReturnValue(mockPathname);
     mockPush.mockClear();
   });
 
+  test('does not fetch data when details param is missing', () => {
+    (useSearchParams as Mock).mockReturnValue(new URLSearchParams());
+    (useGetPokemonDetailsQuery as Mock).mockReturnValue({});
+
+    render(<PokemonCardDetails />);
+    expect(useGetPokemonDetailsQuery).toHaveBeenCalledWith('', { skip: true });
+
+    expect(
+      screen.queryByTestId('pokemon-card-details')
+    ).not.toBeInTheDocument();
+  });
+
+  test('skips API call if details param is empty', () => {
+    const mockSearchParams = new URLSearchParams({ details: '' });
+    (useSearchParams as Mock).mockReturnValue(mockSearchParams);
+    (useGetPokemonDetailsQuery as Mock).mockReturnValue({});
+
+    render(<PokemonCardDetails />);
+    expect(useGetPokemonDetailsQuery).toHaveBeenCalledWith('', { skip: true });
+  });
+
   test('renders the PokemonCardDetails component with given details', () => {
-    render(<PokemonCardDetails details={details} />);
+    (useSearchParams as Mock).mockReturnValue(
+      new URLSearchParams({ details: 'Bulbasaur' })
+    );
+    (useGetPokemonDetailsQuery as Mock).mockReturnValue({
+      data: details,
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<PokemonCardDetails />);
 
     expect(screen.getByText(details.name)).toBeInTheDocument();
     expect(screen.getByRole('img')).toHaveAttribute('src', details.image);
@@ -64,18 +92,50 @@ describe('PokemonCardDetails Component', () => {
     ).toBeInTheDocument();
   });
 
-  test('calls push with correct URL when close button is clicked', () => {
-    render(<PokemonCardDetails details={details} />);
+  test('shows loading state while data is fetching', () => {
+    (useSearchParams as Mock).mockReturnValue(
+      new URLSearchParams({ details: 'Bulbasaur' })
+    );
+    (useGetPokemonDetailsQuery as Mock).mockReturnValue({ isLoading: true });
 
-    const closeButton = screen.getByLabelText('Close');
-    fireEvent.click(closeButton);
-
-    const expectedUrl = `${mockPathname}?`;
-    expect(mockPush).toHaveBeenCalledWith(expectedUrl);
+    render(<PokemonCardDetails />);
+    expect(screen.getByTestId('loader')).toBeInTheDocument();
   });
 
-  test('removes "details" from URL after close button click', () => {
-    render(<PokemonCardDetails details={details} />);
+  test('shows error message when API request fails', () => {
+    (useSearchParams as Mock).mockReturnValue(
+      new URLSearchParams({ details: 'Bulbasaur' })
+    );
+    (useGetPokemonDetailsQuery as Mock).mockReturnValue({
+      isError: true,
+      error: { message: 'Failed to fetch' },
+    });
+
+    render(<PokemonCardDetails />);
+    expect(screen.getByText('Failed to fetch')).toBeInTheDocument();
+  });
+
+  test('renders NoResults when no data is available', () => {
+    (useSearchParams as Mock).mockReturnValue(
+      new URLSearchParams({ details: 'Bulbasaur' })
+    );
+    (useGetPokemonDetailsQuery as Mock).mockReturnValue({ data: null });
+
+    render(<PokemonCardDetails />);
+    expect(screen.getByTestId('no-results')).toBeInTheDocument();
+  });
+
+  test('calls push with correct URL when close button is clicked', () => {
+    (useSearchParams as Mock).mockReturnValue(
+      new URLSearchParams({ details: 'Bulbasaur' })
+    );
+    (useGetPokemonDetailsQuery as Mock).mockReturnValue({
+      data: details,
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<PokemonCardDetails />);
 
     const closeButton = screen.getByLabelText('Close');
     fireEvent.click(closeButton);

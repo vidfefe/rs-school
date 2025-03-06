@@ -1,10 +1,7 @@
-'use client';
 import React from 'react';
-import { ThemeProvider } from '@/context/ThemeContext';
-import { Provider } from 'react-redux';
-import { store } from '@/store/store';
 import '@/styles/globals.css';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import Providers from '@/components/Providers';
 
 export default function RootLayout({
   children,
@@ -15,9 +12,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ErrorBoundary>
-          <ThemeProvider>
-            <Provider store={store}>{children}</Provider>
-          </ThemeProvider>
+          <Providers>{children}</Providers>
         </ErrorBoundary>
       </body>
     </html>

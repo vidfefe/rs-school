@@ -1,40 +1,30 @@
 import { render, screen } from '@testing-library/react';
+import { notFound } from 'next/navigation';
 import ErrorPage from '@/app/error';
 import { vi } from 'vitest';
 
-vi.mock('next', () => ({
-  ...vi.importActual('next'),
-  NextPageContext: vi.fn(),
+vi.mock('next/navigation', () => ({
+  notFound: vi.fn(),
 }));
 
 describe('ErrorPage', () => {
-  test('renders the correct error message when statusCode is provided', async () => {
-    const mockStatusCode = 404;
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
 
-    const mockGetInitialProps = vi
-      .fn()
-      .mockReturnValue({ statusCode: mockStatusCode });
-
-    ErrorPage.getInitialProps = mockGetInitialProps;
+  test('renders the correct error message when statusCode is provided', () => {
+    const mockStatusCode = 500;
 
     render(<ErrorPage statusCode={mockStatusCode} />);
 
     expect(screen.getByText(`Error ${mockStatusCode}`)).toBeInTheDocument();
-    expect(screen.getByText('Please try again later.')).toBeInTheDocument();
+    expect(screen.getByText('Please try again later')).toBeInTheDocument();
+    expect(notFound).not.toHaveBeenCalled();
   });
 
-  test('renders default error message when no statusCode is provided', async () => {
-    const mockStatusCode = undefined;
+  test('calls notFound when statusCode is 404', () => {
+    render(<ErrorPage statusCode={404} />);
 
-    const mockGetInitialProps = vi
-      .fn()
-      .mockReturnValue({ statusCode: mockStatusCode });
-
-    ErrorPage.getInitialProps = mockGetInitialProps;
-
-    render(<ErrorPage statusCode={mockStatusCode} />);
-
-    expect(screen.getByText('An error occurred')).toBeInTheDocument();
-    expect(screen.getByText('Please try again later.')).toBeInTheDocument();
+    expect(notFound).toHaveBeenCalledTimes(1);
   });
 });
