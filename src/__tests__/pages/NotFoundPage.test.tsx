@@ -1,24 +1,21 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import NotFound from '@/pages/NotFoundPage';
-import { vi } from 'vitest';
-import { useNavigate } from 'react-router';
+import { Mock, vi } from 'vitest';
+import { useNavigate } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 
-vi.mock('react-router', async (importOriginal) => {
-  const actual = (await importOriginal()) as typeof import('react-router');
-  return {
-    ...actual,
-    useNavigate: vi.fn(),
-  };
-});
+vi.mock('react-router-dom', () => ({
+  ...vi.importActual('react-router-dom'),
+  useNavigate: vi.fn(),
+}));
 
 describe('NotFound Page', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders correctly', () => {
+  test('renders correctly', () => {
     render(
       <MemoryRouter>
         <NotFound />
@@ -31,9 +28,9 @@ describe('NotFound Page', () => {
     ).toBeInTheDocument();
   });
 
-  it('navigates to home page when button is clicked', async () => {
+  test('navigates to home page when button is clicked', async () => {
     const mockNavigate = vi.fn();
-    (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
+    (useNavigate as Mock).mockReturnValue(mockNavigate);
 
     render(
       <MemoryRouter>

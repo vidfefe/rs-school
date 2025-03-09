@@ -1,22 +1,8 @@
-import { BrowserRouter, Route, Routes } from 'react-router';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import HomePage from '@/pages/HomePage';
-import NotFoundPage from '@/pages/NotFoundPage';
-import PokemonDetailsPage from '@/pages/PokemonDetailsPage';
+import { RouterProvider } from 'react-router-dom';
+import { router } from '@/routes';
 
 const App = () => {
-  return (
-    <ErrorBoundary>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<HomePage />}>
-            <Route index element={<PokemonDetailsPage />} />
-          </Route>
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </BrowserRouter>
-    </ErrorBoundary>
-  );
+  return <RouterProvider router={router} />;
 };
 
 export default App;

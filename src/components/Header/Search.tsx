@@ -1,19 +1,45 @@
-import React, { ChangeEvent, useState } from 'react';
+import { useSearchQuery } from '@/hooks/useSearchQuery';
+import { ChangeEvent, useEffect, useState } from 'react';
+import { useLoaderData, useSearchParams } from 'react-router';
 
-interface SearchProps {
-  onSearch: (searchValue: string) => void;
-  initialValue?: string;
-}
-
-const Search: React.FC<SearchProps> = ({ onSearch, initialValue = '' }) => {
-  const [searchValue, setSearchValue] = useState(initialValue);
-
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(event.target.value);
+const Search = () => {
+  const { searchValue: loaderSearchValue } = useLoaderData() as {
+    searchValue: string;
   };
+  const [searchValue, setSearchValue] = useSearchQuery('searchValue');
+  const [inputValue, setInputValue] = useState<string>(
+    loaderSearchValue || searchValue || ''
+  );
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const trimmedValue = inputValue.trim();
+
+    if (!trimmedValue) {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('searchValue');
+      newParams.set('page', '1');
+      setSearchParams(newParams);
+    } else if (!loaderSearchValue) {
+      setSearchParams({ page: '1', searchValue: trimmedValue });
+    }
+  }, []);
 
   const handleSearch = () => {
-    onSearch(searchValue);
+    const trimmedValue = inputValue.trim();
+    if (trimmedValue) {
+      setSearchValue(trimmedValue);
+      setSearchParams({ page: '1', searchValue: trimmedValue });
+    } else {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('searchValue');
+      newParams.set('page', '1');
+      setSearchParams(newParams);
+    }
+  };
+
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
   };
 
   return (
@@ -24,13 +50,13 @@ const Search: React.FC<SearchProps> = ({ onSearch, initialValue = '' }) => {
         className="border border-gray-300 focus:outline-rose-600 rounded p-1"
         placeholder="Enter name..."
         onChange={handleInputChange}
-        value={searchValue}
+        value={inputValue}
       />
       <button
         type="button"
         data-testid="search-button"
         className="bg-rose-600 font-semibold rounded px-3 py-1"
-        onClick={handleSearch}
+        onClick={() => handleSearch()}
       >
         Search
       </button>

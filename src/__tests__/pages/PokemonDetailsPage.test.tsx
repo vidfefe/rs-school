@@ -1,21 +1,10 @@
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router';
+import { Mock, vi } from 'vitest';
+import { useLoaderData } from 'react-router';
 import PokemonDetailsPage from '@/pages/PokemonDetailsPage';
-import { vi } from 'vitest';
-import { useGetPokemonDetailsQuery } from '@/api/pokemonApi';
 
-vi.mock('react-router', async (importOriginal) => {
-  const actual = (await importOriginal()) as typeof import('react-router');
-  return {
-    ...actual,
-    useLocation: () => ({
-      search: '?details=pikachu',
-    }),
-  };
-});
-
-vi.mock('@/api/pokemonApi', () => ({
-  useGetPokemonDetailsQuery: vi.fn(),
+vi.mock('react-router', () => ({
+  useLoaderData: vi.fn(),
 }));
 
 vi.mock('@/components/Main/PokemonCardDetails', () => ({
@@ -24,84 +13,51 @@ vi.mock('@/components/Main/PokemonCardDetails', () => ({
   ),
 }));
 
+vi.mock('@/components/Error', () => ({
+  default: ({ errorMessage }: { errorMessage: string }) => (
+    <div data-testid="error-message">{errorMessage}</div>
+  ),
+}));
+
 describe('PokemonDetailsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders the loader when loading', () => {
-    (useGetPokemonDetailsQuery as jest.Mock).mockReturnValue({
-      isLoading: true,
-    });
-
-    render(
-      <MemoryRouter>
-        <PokemonDetailsPage />
-      </MemoryRouter>
-    );
-
-    expect(screen.getByTestId('loader')).toBeInTheDocument();
-  });
-
-  it('renders error message on API error', () => {
-    (useGetPokemonDetailsQuery as jest.Mock).mockReturnValue({
+  test('renders error message on API error', async () => {
+    (useLoaderData as Mock).mockReturnValue({
+      data: null,
       isError: true,
       error: new Error('Failed to fetch Pokémon details'),
     });
 
-    render(
-      <MemoryRouter>
-        <PokemonDetailsPage />
-      </MemoryRouter>
-    );
+    render(<PokemonDetailsPage />);
 
-    expect(
-      screen.getByText('Failed to fetch Pokémon details')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('error-message')).toHaveTextContent(
+      'Failed to fetch Pokémon details'
+    );
   });
 
-  it('renders NoResults when no details are returned', () => {
-    (useGetPokemonDetailsQuery as jest.Mock).mockReturnValue({ data: null });
-
-    render(
-      <MemoryRouter>
-        <PokemonDetailsPage />
-      </MemoryRouter>
-    );
-
-    expect(screen.getByTestId('no-results')).toBeInTheDocument();
-    expect(screen.getByText('No Pokemon found')).toBeInTheDocument();
-  });
-
-  it('renders PokemonCardDetails when data is available', () => {
-    (useGetPokemonDetailsQuery as jest.Mock).mockReturnValue({
-      data: { name: 'pikachu' },
+  test('renders null when no data is returned', async () => {
+    (useLoaderData as Mock).mockReturnValue({
+      data: null,
+      isError: false,
     });
 
-    render(
-      <MemoryRouter>
-        <PokemonDetailsPage />
-      </MemoryRouter>
-    );
+    render(<PokemonDetailsPage />);
+
+    // Since it returns null, the page should not render anything
+    expect(screen.queryByTestId('pokemon-details')).toBeNull();
+  });
+
+  test('renders PokemonCardDetails when data is available', async () => {
+    (useLoaderData as Mock).mockReturnValue({
+      data: { name: 'pikachu' },
+      isError: false,
+    });
+
+    render(<PokemonDetailsPage />);
 
     expect(screen.getByTestId('pokemon-details')).toHaveTextContent('pikachu');
-  });
-
-  it('calls useGetPokemonDetailsQuery with empty string when details param is missing', () => {
-    vi.mock('react-router', async (importOriginal) => {
-      const actual = (await importOriginal()) as typeof import('react-router');
-      return {
-        ...actual,
-        useLocation: () => ({ search: '' }),
-      };
-    });
-
-    render(
-      <MemoryRouter>
-        <PokemonDetailsPage />
-      </MemoryRouter>
-    );
-
-    expect(useGetPokemonDetailsQuery).toHaveBeenCalledWith('');
   });
 });

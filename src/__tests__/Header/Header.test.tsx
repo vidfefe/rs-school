@@ -1,53 +1,39 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import Header from '@/components/Header/Header';
-import { ThemeProvider } from '@/context/ThemeContext';
+
+vi.mock('@/components/Header/Search', () => ({
+  default: () => <div data-testid="search-component" />,
+}));
+
+vi.mock('@/components/ThemeToggle', () => ({
+  default: () => <div data-testid="theme-toggle" />,
+}));
 
 describe('Header Component', () => {
-  test('renders Header component with Search and ThemeToggle', () => {
-    render(
-      <ThemeProvider>
-        <Header onSearch={() => {}} />
-      </ThemeProvider>
-    );
+  test('renders Pokémon Search title', () => {
+    render(<Header />);
 
     const title = screen.getByText(/Pokémon Search/i);
-    const searchInput = screen.getByTestId('search-input');
-    const searchButton = screen.getByTestId('search-button');
-    const themeToggleButton = screen.getByRole('button', { name: /🌞|🌙/i });
-
     expect(title).toBeInTheDocument();
-    expect(searchInput).toBeInTheDocument();
-    expect(searchButton).toBeInTheDocument();
-    expect(themeToggleButton).toBeInTheDocument();
   });
 
-  test('calls onSearch when search value changes', async () => {
-    const mockOnSearch = vi.fn();
-    render(
-      <ThemeProvider>
-        <Header onSearch={mockOnSearch} />
-      </ThemeProvider>
-    );
+  test('renders Search and ThemeToggle components', () => {
+    render(<Header />);
 
-    const searchInput = screen.getByTestId('search-input');
-    const searchButton = screen.getByTestId('search-button');
+    const searchComponent = screen.getByTestId('search-component');
+    const themeToggle = screen.getByTestId('theme-toggle');
 
-    fireEvent.change(searchInput, { target: { value: 'charizard' } });
-    fireEvent.click(searchButton);
-
-    expect(mockOnSearch).toHaveBeenCalled();
-    expect(mockOnSearch).toHaveBeenCalledWith('charizard');
+    expect(searchComponent).toBeInTheDocument();
+    expect(themeToggle).toBeInTheDocument();
   });
 
-  test('renders Header with default initialValue', () => {
-    render(
-      <ThemeProvider>
-        <Header onSearch={() => {}} initialValue="bulbasaur" />
-      </ThemeProvider>
-    );
+  test('renders header with proper structure', () => {
+    render(<Header />);
 
-    const searchInput = screen.getByTestId('search-input');
-    expect((searchInput as HTMLInputElement).value).toBe('bulbasaur');
+    const header = screen.getByRole('banner');
+    expect(header).toBeInTheDocument();
+    expect(header).toHaveClass(
+      'flex items-center justify-center gap-5 relative'
+    );
   });
 });

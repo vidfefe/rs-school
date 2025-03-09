@@ -1,10 +1,7 @@
-import { useSearchParams } from 'react-router';
+import { useLoaderData, useSearchParams } from 'react-router';
 
-interface PaginationProps {
-  totalPages: number;
-}
-
-const Pagination = ({ totalPages }: PaginationProps) => {
+const Pagination = () => {
+  const { totalPages } = useLoaderData() as { totalPages: number };
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page')) || 1;
   const details = searchParams.get('details') || '';
@@ -41,11 +38,11 @@ const Pagination = ({ totalPages }: PaginationProps) => {
       </span>
       <button
         className={`px-3 py-1 rounded font-bold border-2 transition-all ${
-          page === totalPages
+          page === totalPages || totalPages === 0
             ? 'border-gray-300 cursor-not-allowed'
             : 'bg-rose-600 border-rose-600 hover:bg-transparent'
         }`}
-        disabled={page === totalPages}
+        disabled={page === totalPages || totalPages === 0}
         onClick={() => handlePageChange(page + 1)}
       >
         {'>'}

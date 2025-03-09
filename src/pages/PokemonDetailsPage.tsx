@@ -1,35 +1,30 @@
-import { useLocation } from 'react-router';
-import Loader from '@/components/Loader';
-import NoResults from '@/components/NoResults';
+import { useLoaderData } from 'react-router';
 import PokemonCardDetails from '@/components/Main/PokemonCardDetails';
-import { useGetPokemonDetailsQuery } from '@/api/pokemonApi';
 import Error from '@/components/Error';
+import { PokemonDetails } from '@/types/pokemonTypes';
+
+interface LoaderData {
+  data: PokemonDetails;
+  isError: boolean;
+  error: unknown;
+}
 
 const PokemonDetailsPage = () => {
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const pokemonName = searchParams.get('details');
-
-  const {
-    data: details,
-    isError,
-    error,
-    isLoading,
-  } = useGetPokemonDetailsQuery(pokemonName || '');
-
-  if (isLoading) {
-    return <Loader />;
-  }
+  const { data: detailsData, isError, error } = useLoaderData<LoaderData>();
 
   if (isError) {
     return <Error errorMessage={(error as Error).message} />;
   }
 
-  if (!details) {
-    return <NoResults />;
+  if (!detailsData) {
+    return null;
   }
 
-  return <PokemonCardDetails details={details} />;
+  return (
+    <aside className="w-1/3 min-w-[300px]">
+      <PokemonCardDetails details={detailsData} />
+    </aside>
+  );
 };
 
 export default PokemonDetailsPage;
