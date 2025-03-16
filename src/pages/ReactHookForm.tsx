@@ -31,6 +31,9 @@ const ReactHookFormPage: FC = () => {
   } = useForm<FormData>({
     resolver: yupResolver(validationSchema),
     mode: 'onChange',
+    defaultValues: {
+      gender: 'other',
+    },
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,11 +73,23 @@ const ReactHookFormPage: FC = () => {
       <h1 className="text-3xl font-semibold">Controlled Form</h1>
       <form className="max-w-md w-full" onSubmit={handleSubmit(onSubmit)}>
         <label htmlFor="name">Name:</label>
-        <input id="name" {...register('name')} type="text" placeholder="Name" />
+        <input
+          id="name"
+          {...register('name')}
+          type="text"
+          placeholder="Name"
+          autoComplete="given-name"
+        />
         {errors.name && <p>{errors.name.message}</p>}
 
         <label htmlFor="age">Age:</label>
-        <input id="age" {...register('age')} type="number" placeholder="Age" />
+        <input
+          id="age"
+          {...register('age')}
+          type="number"
+          placeholder="Age"
+          autoComplete="bday-year"
+        />
         {errors.age && <p>{errors.age.message}</p>}
 
         <label htmlFor="email">Email:</label>
@@ -83,6 +98,7 @@ const ReactHookFormPage: FC = () => {
           {...register('email')}
           type="email"
           placeholder="Email"
+          autoComplete="email"
         />
         {errors.email && <p>{errors.email.message}</p>}
 
@@ -91,6 +107,7 @@ const ReactHookFormPage: FC = () => {
           id="password"
           {...register('password')}
           type="password"
+          autoComplete="new-password"
           placeholder="Password"
         />
         {errors.password && <p>{errors.password.message}</p>}
@@ -100,6 +117,7 @@ const ReactHookFormPage: FC = () => {
           id="confirmPassword"
           {...register('confirmPassword')}
           type="password"
+          autoComplete="new-password"
           placeholder="Confirm Password"
         />
         {errors.confirmPassword && <p>{errors.confirmPassword.message}</p>}
@@ -142,6 +160,7 @@ const ReactHookFormPage: FC = () => {
           {...register('country')}
           list="country-list"
           placeholder="Country"
+          autoComplete="country"
         />
         <datalist id="country-list">
           {countries.map((country) => (
@@ -166,6 +185,7 @@ const ReactHookFormPage: FC = () => {
             id="acceptTerms"
             {...register('acceptTerms')}
             type="checkbox"
+            autoComplete="off"
           />
         </div>
         {errors.acceptTerms && <p>{errors.acceptTerms.message}</p>}

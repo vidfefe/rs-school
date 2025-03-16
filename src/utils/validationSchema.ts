@@ -36,20 +36,13 @@ export const validationSchema = Yup.object({
       'fileFormat',
       'Unsupported file format (only PNG, JPEG allowed)',
       (value) => {
-        console.log('File value in fileFormat test:', value); // Выводим то, что приходит в валидацию
-        if (value instanceof File) {
-          console.log(value.type);
-          return ['image/png', 'image/jpeg'].includes(value.type);
-        }
-        return false;
+        return (
+          value instanceof File &&
+          ['image/png', 'image/jpeg'].includes(value.type)
+        );
       }
     )
     .test('fileSize', 'File is too large (max 5MB)', (value) => {
-      console.log('File value in fileSize test:', value);
-      if (value instanceof File) {
-        console.log(value.size);
-        return value.size <= 5 * 1024 * 1024;
-      }
-      return false;
+      return value instanceof File && value.size <= 5 * 1024 * 1024;
     }),
 });

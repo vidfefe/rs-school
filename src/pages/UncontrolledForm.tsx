@@ -87,15 +87,33 @@ const UncontrolledFormPage: FC = () => {
       <h1 className="text-3xl font-semibold">Uncontrolled Form</h1>
       <form className="max-w-md w-full" onSubmit={handleSubmit}>
         <label htmlFor="name">Name:</label>
-        <input id="name" ref={nameRef} type="text" placeholder="Name" />
+        <input
+          id="name"
+          ref={nameRef}
+          type="text"
+          placeholder="Name"
+          autoComplete="given-name"
+        />
         {errors.name && <p>{errors.name}</p>}
 
         <label htmlFor="age">Age:</label>
-        <input id="age" ref={ageRef} type="number" placeholder="Age" />
+        <input
+          id="age"
+          ref={ageRef}
+          type="number"
+          placeholder="Age"
+          autoComplete="bday-year"
+        />
         {errors.age && <p>{errors.age}</p>}
 
         <label htmlFor="email">Email:</label>
-        <input id="email" ref={emailRef} type="email" placeholder="Email" />
+        <input
+          id="email"
+          ref={emailRef}
+          type="email"
+          placeholder="Email"
+          autoComplete="email"
+        />
         {errors.email && <p>{errors.email}</p>}
 
         <label htmlFor="password">Password:</label>
@@ -104,6 +122,7 @@ const UncontrolledFormPage: FC = () => {
           ref={passwordRef}
           type="password"
           placeholder="Password"
+          autoComplete="new-password"
         />
         {errors.password && <p>{errors.password}</p>}
 
@@ -113,6 +132,7 @@ const UncontrolledFormPage: FC = () => {
           ref={confirmPasswordRef}
           type="password"
           placeholder="Confirm Password"
+          autoComplete="new-password"
         />
         {errors.confirmPassword && <p>{errors.confirmPassword}</p>}
 
@@ -145,6 +165,7 @@ const UncontrolledFormPage: FC = () => {
               name="gender"
               value="other"
               ref={otherRef}
+              defaultChecked={true}
             />
             Other
           </label>
@@ -157,6 +178,7 @@ const UncontrolledFormPage: FC = () => {
           ref={countryRef}
           list="country-list"
           placeholder="Country"
+          autoComplete="country"
         />
         <datalist id="country-list">
           {countries.map((country) => (
@@ -177,7 +199,12 @@ const UncontrolledFormPage: FC = () => {
 
         <div className="flex items-center gap-2">
           <label htmlFor="acceptTerms">Accept Terms</label>
-          <input id="acceptTerms" ref={acceptTermsRef} type="checkbox" />
+          <input
+            id="acceptTerms"
+            ref={acceptTermsRef}
+            type="checkbox"
+            autoComplete="off"
+          />
         </div>
         {errors.acceptTerms && <p>{errors.acceptTerms}</p>}
 
