@@ -1,29 +1,8 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css';
-import Header from './components/Header';
-import ReactHookFormPage from './pages/ReactHookForm';
-import UncontrolledFormPage from './pages/UncontrolledForm';
-import MainPage from './pages/Main';
+import HomePage from './pages/HomePage';
 
 function App() {
-  return (
-    <BrowserRouter>
-      <div className="container">
-        <Header />
-        <Routes>
-          <Route path="/" element={<MainPage />}></Route>
-          <Route
-            path="/uncontrolled"
-            element={<UncontrolledFormPage />}
-          ></Route>
-          <Route
-            path="/react-hook-form"
-            element={<ReactHookFormPage />}
-          ></Route>
-        </Routes>
-      </div>
-    </BrowserRouter>
-  );
+  return <HomePage />;
 }
 
 export default App;
