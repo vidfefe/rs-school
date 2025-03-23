@@ -1,54 +1,31 @@
-# React + TypeScript + Vite
+# Initial Profiling with React Dev Tools Profiler
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Before applying optimizations, the application was profiled using React Dev Tools Profiler. Below are the key performance metrics recorded:
 
-Currently, two official plugins are available:
+Parameters Checked:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Commit Duration: [1.9s] – Time taken for React to render the committed updates.
 
-## Expanding the ESLint configuration
+Render Duration: [25,7ms] – Time taken for individual components to render.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Interactions, Flame Graph, Ranked Chart:
+![Not optimizate](<Снимок экрана 2025-03-23 103611.png>)
+![Not optimizate](<Снимок экрана 2025-03-23 103630.png>)
+![Not optimizate](<Снимок экрана 2025-03-23 104711.png>)
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-});
-```
+# Optimization with React.memo and useMemo
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+To improve performance, React.memo and useMemo were used to prevent unnecessary re-renders and memoize values.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x';
-import reactDom from 'eslint-plugin-react-dom';
+After implementing these optimizations, the same profiling was conducted again to measure improvements.
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-});
-```
+Parameters Compared:
+
+Commit Duration: [Before: 1,9s] → [After: 2,2 s] – Reduction in time taken for React to render committed updates.
+
+Render Duration: [Before: 25,7ms] → [After: 13ms] – Reduction in time taken for individual components to render.
+
+Interactions, Flame Graph, Ranked Chart:
+![Optimizate](<Снимок экрана 2025-03-23 102401-1.png>)
+![Optimizate](<Снимок экрана 2025-03-23 102708.png>)
+![Optimizate](<Снимок экрана 2025-03-23 102752.png>)
