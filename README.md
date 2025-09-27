@@ -8,7 +8,6 @@ It allows users to **search for Pokémon**, **save results**, **download them as
 - **Next.js** + **React**
 - **TypeScript**
 - **TailwindCSS** for styling
-- **React Router**
 - **Redux Toolkit** for state management
 - **Vitest** + **React Testing Library** for testing
 - **MSW (Mock Service Worker)** for API mocking
